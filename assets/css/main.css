@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Lobster&family=Pinyon+Script&display=swap');
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,10 +15,11 @@
   --nav-h:44px;
   --topbar-h:38px;
   --header-h:98px;
+  --font-nav:'Pinyon Script',cursive;
   --font-display:'Lobster',cursive;
 }
-html{scroll-behavior:smooth}
-body{font-family:'Open Sans',sans-serif;color:var(--text);background:var(--white);line-height:1.6;font-size:15px}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Open Sans',sans-serif;color:var(--text);background:var(--white);line-height:1.6;font-size:15px;overflow-x:hidden}
 a{text-decoration:none;color:inherit}
 ul{list-style:none}
 img{max-width:100%;display:block}
@@ -146,8 +147,8 @@ img{max-width:100%;display:block}
   align-items:center;
   height:var(--header-h);
   padding:0 18px;
-  font-family:'Open Sans',sans-serif;
-  font-size:15px;
+  font-family:var(--font-display);
+  font-size:26px;
   font-weight:400;
   letter-spacing:0.3px;
   text-transform:none;
@@ -185,7 +186,7 @@ img{max-width:100%;display:block}
 .dropdown{
   display:none;
   position:absolute;
-  top:88px;
+  top:var(--header-h);
   left:0;
   background:#fff;
   border-top:3px solid var(--gold);
@@ -265,7 +266,11 @@ img{max-width:100%;display:block}
   display:none;
   flex-direction:column;
   gap:5px;
-  padding:8px;
+  padding:10px;
+  min-width:44px;
+  min-height:44px;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
   background:none;border:none;
 }
@@ -281,9 +286,9 @@ img{max-width:100%;display:block}
 }
 .hero-bg{
   position:absolute;inset:0;
-  background-image:url('https://assets.laserskinpa.com/Images/Sites/D/DevonDermatologyServices/Splash.png');
+  background-image:url('../images/office.jpeg');
   background-size:cover;
-  background-position:center top;
+  background-position:center center;
 }
 .hero-overlay{
   position:absolute;inset:0;
@@ -457,7 +462,12 @@ img{max-width:100%;display:block}
   height:220px;
   overflow:hidden;
   background:var(--offwhite2);
+  background-size:cover;
+  background-position:center;
 }
+.tile-img-wrap--cosmetic{background-image:url('../images/cosmetic-laser.jpg')}
+.tile-img-wrap--dermaplaning{background-image:url('../images/dermaplaning.jpg')}
+.tile-img-wrap--laser-esthetics{background-image:url('../images/laser-esthetics.jpg')}
 .tile-img-wrap img{
   width:100%;height:100%;
   object-fit:cover;
@@ -817,9 +827,9 @@ footer{
 .mnav-logo em{font-family:'Pinyon Script',cursive;font-style:normal;color:var(--gold);font-size:30px}
 .mnav-close{font-size:26px;cursor:pointer;color:var(--dark);background:none;border:none}
 .mnav-links a{
-  display:block;padding:12px 0;
-  font-family:'Open Sans',sans-serif;
-  font-size:16px;font-weight:400;
+  display:block;padding:14px 0;
+  font-family:var(--font-display);
+  font-size:28px;font-weight:400;
   letter-spacing:0.3px;
   color:var(--dark);
   border-bottom:1px solid var(--offwhite2);
@@ -844,24 +854,95 @@ footer{
 @media(max-width:1100px){
   .main-nav{display:none}
   .hamburger{display:flex}
-  .header-inner{padding:0 20px}
-  .hero-content{padding:0 30px}
-  .hero h1{font-size:48px}
+  .header-inner{padding:0 16px}
+  .hero{height:520px}
+  .hero-content{padding:0 24px}
+  .hero h1{font-size:48px;max-width:100%}
+  .section-title-center{font-size:34px}
+  .welcome-text h2,.contact-info h2,.provider-text h2{font-size:34px}
   .services-section,.welcome-section,.provider-section,.contact-section,.testimonials-section{padding:64px 20px}
 }
+
 @media(max-width:860px){
   .welcome-inner,.provider-inner,.contact-inner{grid-template-columns:1fr;gap:40px}
-  .services-tiles,.testi-grid{grid-template-columns:1fr}
-  .service-tiles{grid-template-columns:1fr}
+  .service-tiles,.testi-grid{grid-template-columns:1fr}
   .stats-inner{grid-template-columns:repeat(2,1fr)}
   .stat-item:nth-child(2){border-right:none}
   .footer-top{grid-template-columns:1fr 1fr;gap:32px}
-  .ratings-row{gap:32px}
+  .ratings-row{gap:20px}
+  .ratings-row .btn-gold,.ratings-row .btn-outline-gold{display:inline-block;margin:4px 0}
+  .services-btns .btn-gold{display:inline-block}
+  .welcome-img-wrap{max-height:320px}
+  .welcome-img,.welcome-img-fallback{height:280px}
+  .provider-img-wrap{max-height:400px}
+  .contact-form-box{padding:28px 24px}
+  .section-sub-center{padding:0 4px}
 }
+
+@media(max-width:640px){
+  #topbar{height:auto;min-height:var(--topbar-h)}
+  .topbar-inner{
+    flex-wrap:wrap;
+    justify-content:center;
+    padding:6px 12px;
+    gap:0;
+  }
+  .tb-item{
+    height:auto;
+    padding:8px 12px;
+    font-size:10px;
+    border-left:none;
+  }
+  .tb-book{padding:8px 14px}
+  .logo-line1{font-size:8px;letter-spacing:2px}
+  .logo-line2{font-size:18px}
+  .logo-line2 em{font-size:26px}
+  .logo-line3{font-size:7px}
+  :root{--header-h:72px}
+  .hero{height:440px}
+  .hero h1{font-size:38px;line-height:1.12}
+  .hero-sub{font-size:10px;letter-spacing:2px;margin-bottom:28px}
+  .hero-eyebrow{font-size:9px;letter-spacing:3px}
+  .stat-num{font-size:40px}
+  .stat-label{font-size:9px}
+  .stats-bar{padding:28px 16px}
+  .section-title-center{font-size:28px}
+  .welcome-text h2,.contact-info h2,.provider-text h2{font-size:28px}
+  .section-sub-center{font-size:14px;margin-bottom:40px}
+  .tile-body{padding:18px 18px 22px}
+  .tile-title{font-size:18px}
+  .tile-desc{font-size:14px}
+  .map-wrap iframe{height:280px}
+  .rating-stat .rnum{font-size:40px}
+  .mnav-links a{font-size:26px;padding:16px 0}
+}
+
 @media(max-width:540px){
-  .stats-inner{grid-template-columns:repeat(2,1fr)}
+  .stats-inner{grid-template-columns:1fr 1fr}
   .footer-top{grid-template-columns:1fr}
   .form-row2{grid-template-columns:1fr}
-  .hero h1{font-size:36px}
+  .hero h1{font-size:32px}
   .testi-grid{grid-template-columns:1fr}
+  .ratings-row{
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+  }
+  .ratings-row .btn-gold,
+  .ratings-row .btn-outline-gold{
+    width:100%;
+    max-width:280px;
+    text-align:center;
+  }
+  .services-btns .btn-gold{
+    width:100%;
+    max-width:300px;
+    text-align:center;
+  }
+  .btn-gold,.btn-outline-gold{
+    padding:14px 24px;
+    min-height:44px;
+  }
+  .disclaimer-bar p{padding:0 16px;font-size:10px}
+  .footer-bottom p{padding:0 16px}
 }
