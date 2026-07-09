@@ -82,6 +82,15 @@ if ($LASTEXITCODE -ne 0) {
   Write-Host "Workflow will run automatically on push; check Actions if needed." -ForegroundColor Yellow
 }
 
+$configCheck = Get-Content (Join-Path $PSScriptRoot "assets\js\site-config.js") -Raw
+if ($configCheck -notmatch "reviewsBinId:\s*'[^']+'") {
+  Write-Host ""
+  Write-Host "IMPORTANT: Review cloud storage is not configured yet." -ForegroundColor Yellow
+  Write-Host "Approved reviews will NOT appear on the live site until you run:" -ForegroundColor Yellow
+  Write-Host "  SETUP-REVIEWS-STORAGE.bat" -ForegroundColor Cyan
+  Write-Host "Then run this deploy script again." -ForegroundColor Yellow
+}
+
 Write-Host ""
 Write-Host "Deployment started!" -ForegroundColor Green
 Write-Host ""

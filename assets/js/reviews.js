@@ -4,6 +4,8 @@
   var config = window.FAW_SITE_CONFIG || {};
   var approveSecret = config.reviewApproveSecret || 'faw-approve-2026-mkhan';
   var notifyEmail = config.notifyEmail || 'malikkhan0225@gmail.com';
+  var reviewsBinId = String(config.reviewsBinId || '').trim();
+  var reviewsBinKey = String(config.reviewsBinKey || '').trim();
 
   function emptyList() {
     return [];
@@ -77,6 +79,10 @@
     return window.location.hostname.endsWith('github.io');
   }
 
+  function hasCloudStorage() {
+    return !!(reviewsBinId && reviewsBinKey);
+  }
+
   async function fetchApiReviews() {
     try {
       var res = await fetch(apiBase() + '/api/reviews?_=' + Date.now(), {
@@ -108,6 +114,26 @@
     }
   }
 
+  async function fetchCloudReviews() {
+    if (!reviewsBinId) return emptyList();
+    try {
+      var headers = { Accept: 'application/json' };
+      if (reviewsBinKey) headers['X-Master-Key'] = reviewsBinKey;
+      var res = await fetch('https://api.jsonbin.io/v3/b/' + reviewsBinId + '/latest?_=' + Date.now(), {
+        headers: headers,
+        cache: 'no-store'
+      });
+      if (!res.ok) return emptyList();
+      var data = await res.json();
+      var record = data.record;
+      if (Array.isArray(record)) return record;
+      if (record && Array.isArray(record.approved)) return record.approved;
+      return emptyList();
+    } catch (e) {
+      return emptyList();
+    }
+  }
+
   async function saveApiReview(review) {
     try {
       var res = await fetch(apiBase() + '/api/reviews', {
@@ -121,13 +147,41 @@
       if (!res.ok) return false;
       var data = await res.json();
       if (data && Array.isArray(data.approved)) {
-        // Keep local mirror in sync with server truth
         writeLocalApproved(data.approved);
       }
       return true;
     } catch (e) {
       return false;
     }
+  }
+
+  async function saveCloudReview(review) {
+    if (!hasCloudStorage()) {
+      throw new Error(
+        'Review cloud storage is not configured. Run SETUP-REVIEWS-STORAGE.bat once, then DEPLOY-GITHUB-PAGES.bat.'
+      );
+    }
+
+    var current = await fetchCloudReviews();
+    var list = mergeReviews(current, [review]);
+
+    var res = await fetch('https://api.jsonbin.io/v3/b/' + reviewsBinId, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-Master-Key': reviewsBinKey,
+        'X-Bin-Versioning': 'false'
+      },
+      body: JSON.stringify(list)
+    });
+
+    if (!res.ok) {
+      var errText = '';
+      try { errText = await res.text(); } catch (e) { /* ignore */ }
+      throw new Error(errText || 'Could not save the approved review online.');
+    }
+    return true;
   }
 
   function mergeReviews() {
@@ -223,8 +277,6 @@
     };
     var encoded = toBase64Url(JSON.stringify(payload));
     var sig = signPayload(encoded);
-
-    // Use stable public URL for email approval links (GitHub Pages, not local tunnel)
     var origin = publicSiteBase();
     var page = origin + '/pages/approve-review.html';
     return page + '?d=' + encodeURIComponent(encoded) + '&s=' + encodeURIComponent(sig);
@@ -364,16 +416,14 @@
       patient_email: review.email,
       rating: review.rating + ' / 5 stars',
       review_text: review.text,
+      approve_link: approveUrl,
       message:
         'A new patient review is waiting for approval.\n\n' +
         'Patient: ' + review.name + '\n' +
         'Email: ' + review.email + '\n' +
         'Rating: ' + review.rating + ' / 5\n\n' +
         'Review:\n' + review.text + '\n\n' +
-        'APPROVE LINK (copy and open in your browser if the button does not work):\n' +
-        approveUrl + '\n\n' +
-        'The review will NOT appear on the website until you open the link and click Approve.',
-      approve_link: approveUrl
+        'OPEN THIS LINK TO APPROVE:\n' + approveUrl
     };
 
     if (window.FAWForms && window.FAWForms.sendEmail) {
@@ -402,35 +452,6 @@
     }
   }
 
-  async function notifyReviewPublished(review) {
-    var body = {
-      _template: 'table',
-      _captcha: 'false',
-      _subject: 'Review approved on website',
-      type: 'Approved Review',
-      patient_name: review.name,
-      patient_email: review.email,
-      rating: review.rating + ' / 5 stars',
-      review_text: review.text,
-      review_json: JSON.stringify(review, null, 2),
-      note: 'On GitHub Pages: add this review to assets/data/approved-reviews.json and run deploy-github-pages.ps1 so all visitors see it.'
-    };
-
-    if (window.FAWForms && window.FAWForms.sendEmail) {
-      await window.FAWForms.sendEmail(body);
-      return;
-    }
-
-    await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(notifyEmail), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-  }
-
   async function publishReview(data) {
     var review = {
       id: data.id,
@@ -444,14 +465,25 @@
       approvedAt: new Date().toISOString()
     };
 
-    upsertLocal(review);
-
-    var saved = await saveApiReview(review);
-
-    if (!saved && isGitHubPages()) {
-      await notifyReviewPublished(review);
+    if (await saveApiReview(review)) {
+      upsertLocal(review);
+      return review;
     }
 
+    if (hasCloudStorage()) {
+      await saveCloudReview(review);
+      upsertLocal(review);
+      return review;
+    }
+
+    if (isGitHubPages()) {
+      throw new Error(
+        'Review storage is not set up for the live website. ' +
+        'On your PC run SETUP-REVIEWS-STORAGE.bat once, then DEPLOY-GITHUB-PAGES.bat.'
+      );
+    }
+
+    upsertLocal(review);
     return review;
   }
 
@@ -459,6 +491,7 @@
     var statusEl = document.getElementById('approve-status');
     var detailEl = document.getElementById('approve-detail');
     var btn = document.getElementById('approve-confirm-btn');
+    var approving = false;
 
     function setStatus(title, detail, type) {
       if (statusEl) {
@@ -479,17 +512,35 @@
       return;
     }
 
+    var existing = await getPublicReviews();
+    if (existing.some(function (r) { return r.id === data.id; })) {
+      setStatus(
+        'Already approved',
+        'This review was already published. You can view it on the Reviews page.',
+        'success'
+      );
+      if (detailEl) {
+        detailEl.innerHTML =
+          '<p class="approve-preview">"' + escapeHtml(data.text) + '"</p>' +
+          '<p><a class="btn-gold" href="reviews.html">View Reviews</a></p>';
+      }
+      if (btn) btn.hidden = true;
+      return;
+    }
+
     if (btn) {
       btn.hidden = false;
       btn.disabled = false;
       btn.onclick = async function () {
+        if (approving) return;
+        approving = true;
         btn.disabled = true;
         btn.textContent = 'Publishing…';
         try {
           var review = await publishReview(data);
           setStatus(
             'Review approved',
-            review.name + ' — ' + review.rating + '/5 stars is now live on the website.',
+            review.name + ' — ' + review.rating + '/5 stars is now live on the website for all visitors.',
             'success'
           );
           if (detailEl) {
@@ -503,6 +554,7 @@
           setStatus('Could not approve review', err.message || 'Please try again.', 'error');
           btn.disabled = false;
           btn.textContent = 'Approve & Publish Review';
+          approving = false;
         }
       };
     }
@@ -526,9 +578,11 @@
 
     initStarRating(form);
     var submitBtn = form.querySelector('.form-submit-btn');
+    var submitting = false;
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+      if (submitting) return;
       if (form.company && form.company.value.trim()) return;
 
       var data = {
@@ -547,6 +601,7 @@
         return;
       }
 
+      submitting = true;
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
@@ -577,6 +632,7 @@
       } catch (err) {
         showFormMessage(form, err.message || 'Could not send your review. Please try again.', 'error');
       } finally {
+        submitting = false;
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Submit Review';
@@ -586,17 +642,14 @@
   }
 
   async function getPublicReviews() {
-    var seeded = await fetchSeededReviews();
+    var cloud = hasCloudStorage() ? await fetchCloudReviews() : emptyList();
     var api = await fetchApiReviews();
+    var seeded = await fetchSeededReviews();
     var local = readLocalApproved();
 
-    if (seeded.length || api.length) {
-      var live = mergeReviews(seeded, api, local);
-      writeLocalApproved(live);
-      return live;
-    }
-
-    return mergeReviews(local, readLegacyLocal(), seeded);
+    var merged = mergeReviews(seeded, cloud, api, local);
+    writeLocalApproved(merged);
+    return merged;
   }
 
   async function initDisplays() {
