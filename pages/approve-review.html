@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patient Reviews | Foundational Aesthetic Wellness</title>
-<meta name="description" content="Read patient reviews for Foundational Aesthetic Wellness.">
+<title>Approve Review | Foundational Aesthetic Wellness</title>
+<meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../assets/images/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,22 +19,20 @@
   <div class="page-hero__overlay"></div>
   <div class="page-hero__inner">
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-      <a href="../index.html">Home</a><span class="sep">/</span><span>Reviews</span>
+      <a href="../index.html">Home</a><span class="sep">/</span><a href="reviews.html">Reviews</a><span class="sep">/</span><span>Approve</span>
     </nav>
-    <h1>Patient Reviews</h1>
+    <h1>Review Approval</h1>
   </div>
 </section>
 
-<div class="page-body">
-  <p>At Foundational Aesthetic Wellness, we pride ourselves on the care we deliver. Our team is dedicated to developing personalized treatment plans for your medical, laser, and cosmetic needs.</p>
-
-  <div class="reviews-stats-row" data-reviews-stats hidden></div>
-
-  <div class="testi-grid testi-grid--page" data-reviews-list data-reviews-show-date="true" style="margin-top:32px"></div>
-
-  <div style="text-align:center;margin-top:40px">
-    <a href="leave-a-review.html" class="btn-gold">Leave A Review</a>
+<div class="page-body page-body--narrow">
+  <div class="review-info-box">
+    <p>Use this page only from the Approve link in your review notification email. Approving publishes the review on the public website.</p>
   </div>
+
+  <h2 id="approve-status" class="approve-status">Checking approval link…</h2>
+  <div id="approve-detail" class="approve-detail"></div>
+  <button type="button" id="approve-confirm-btn" class="form-submit-btn" hidden style="max-width:360px;margin-top:8px">Approve &amp; Publish Review</button>
 </div>
 
 </main>

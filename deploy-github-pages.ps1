@@ -10,15 +10,35 @@ $repoName = "foundational-aesthetic-wellness"
 
 Set-Location $PSScriptRoot
 
-& $gh auth status | Out-Null
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "  Deploy to GitHub Pages" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
+Write-Host ""
+
+& $gh auth status 2>&1 | Out-Null
 if ($LASTEXITCODE -ne 0) {
-  Write-Host "Log in first, then run this script again:" -ForegroundColor Yellow
+  Write-Host "You are not logged into GitHub yet." -ForegroundColor Yellow
+  Write-Host ""
+  Write-Host "Run this first (one time):" -ForegroundColor Cyan
   Write-Host "  gh auth login"
+  Write-Host ""
+  Write-Host "Then run this script again:" -ForegroundColor Cyan
+  Write-Host "  .\deploy-github-pages.ps1"
   exit 1
 }
 
 $owner = (& $gh api user -q .login).Trim()
-Write-Host "GitHub account: $owner"
+$pagesUrl = "https://$owner.github.io/$repoName/"
+Write-Host "GitHub account: $owner" -ForegroundColor Gray
+Write-Host "Live site URL:  $pagesUrl" -ForegroundColor Cyan
+Write-Host ""
+
+# Set public URL in site-config.js for approval email links
+$configPath = Join-Path $PSScriptRoot "assets\js\site-config.js"
+$config = Get-Content $configPath -Raw
+$config = $config -replace "publicSiteUrl:\s*'[^']*'", "publicSiteUrl: '$pagesUrl'"
+Set-Content -Path $configPath -Value $config -NoNewline
 
 if (-not (Test-Path ".git")) {
   & $git init
@@ -27,29 +47,51 @@ if (-not (Test-Path ".git")) {
 
 $hasRemote = & $git remote 2>$null
 if (-not $hasRemote) {
+  Write-Host "Creating GitHub repo and pushing..." -ForegroundColor Cyan
   & $gh repo create $repoName --public --source=. --remote=origin --push
 } else {
   & $git add -A
   $status = & $git status --porcelain
   if ($status) {
-    & $git commit -m "Update site for GitHub Pages"
+    & $git -c user.name="$owner" -c user.email="$owner@users.noreply.github.com" commit -m "Deploy site to GitHub Pages"
   }
   & $git push -u origin main
 }
 
-# Enable GitHub Pages via Actions (recommended)
-& $gh api --method PUT "/repos/$owner/$repoName/pages" -f build_type=workflow | Out-Null
+Write-Host "Enabling GitHub Pages..." -ForegroundColor Cyan
+$pagesApi = "/repos/$owner/$repoName/pages"
+$pagesExists = $true
+& $gh api $pagesApi 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) { $pagesExists = $false }
 
-# Trigger deploy workflow
-& $gh workflow run "Deploy to GitHub Pages" --repo "$owner/$repoName" 2>$null
+if ($pagesExists) {
+  & $gh api --method PUT $pagesApi -f build_type=workflow 2>$null | Out-Null
+} else {
+  & $gh api --method POST $pagesApi -f build_type=workflow 2>$null | Out-Null
+}
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "Could not enable GitHub Pages via API." -ForegroundColor Red
+  Write-Host "Enable manually: https://github.com/$owner/$repoName/settings/pages" -ForegroundColor Yellow
+  Write-Host "Choose: Source = GitHub Actions" -ForegroundColor Yellow
+  exit 1
+}
 
-$url = "https://$owner.github.io/$repoName/"
+Write-Host "Starting deployment workflow..." -ForegroundColor Cyan
+& $gh workflow run "Deploy to GitHub Pages" --repo "$owner/$repoName"
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "Workflow will run automatically on push; check Actions if needed." -ForegroundColor Yellow
+}
+
 Write-Host ""
-Write-Host "Deployment started." -ForegroundColor Green
-Write-Host "Client link: $url" -ForegroundColor Cyan
+Write-Host "Deployment started!" -ForegroundColor Green
 Write-Host ""
-Write-Host "If you still see 404:"
-Write-Host "1. Open https://github.com/$owner/$repoName/settings/pages"
-Write-Host "2. Source must be: GitHub Actions"
-Write-Host "3. Open https://github.com/$owner/$repoName/actions and wait for green checkmark"
-Write-Host "4. index.html must be in the repo root (not inside a subfolder)"
+Write-Host "Your permanent website link:" -ForegroundColor Yellow
+Write-Host "  $pagesUrl" -ForegroundColor Green
+Write-Host ""
+Write-Host "Wait 1-3 minutes, then open the link above." -ForegroundColor Gray
+Write-Host "If you see 404, check:" -ForegroundColor Gray
+Write-Host "  https://github.com/$owner/$repoName/actions"
+Write-Host "  https://github.com/$owner/$repoName/settings/pages"
+Write-Host ""
+Write-Host "You do NOT need local tunnel / START-PREVIEW.bat for clients anymore." -ForegroundColor Yellow
+Write-Host ""

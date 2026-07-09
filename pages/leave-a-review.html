@@ -1,216 +1,82 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Leave A Review | Foundational Aesthetic Wellness</title>
-
 <meta name="description" content="Share your experience with Foundational Aesthetic Wellness.">
-
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Pinyon+Script&family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+<link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/images/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/main.css">
-
 <link rel="stylesheet" href="../assets/css/pages.css">
-
 </head>
-
 <body data-base="../">
-
 <main id="page-main" class="site-page">
 
-
-
 <section class="page-hero">
-
   <div class="page-hero__bg" style="background-image:url('https://assets.laserskinpa.com/Images/Sites/D/DevonDermatologyServices/MasterPage/1302079.jpg')"></div>
-
   <div class="page-hero__overlay"></div>
-
   <div class="page-hero__inner">
-
     <nav class="breadcrumbs" aria-label="Breadcrumb">
-
       <a href="../index.html">Home</a><span class="sep">/</span><a href="reviews.html">Reviews</a><span class="sep">/</span><span>Leave A Review</span>
-
     </nav>
-
     <h1>We Appreciate Your Feedback!</h1>
-
   </div>
-
 </section>
 
-
-
 <div class="page-body page-body--narrow">
-
   <p>We are constantly striving to perfect the patient experience and value your feedback.</p>
 
-
-
   <div class="review-info-box">
-
-    <p><strong>Verified reviews only.</strong> After you submit your review, we send a verification code to your email. Your review is published only after you confirm the code — this helps keep out bots and fake submissions.</p>
-
+    <p>Share your experience below. Your review is sent to our team first and only appears on the website after it is approved.</p>
   </div>
 
-
-
-  <form id="review-form" class="review-form" data-redirect="reviews.html" novalidate>
-
+  <form id="review-form" class="review-form" novalidate>
     <div class="review-honeypot" aria-hidden="true">
-
       <label for="review-company">Company</label>
-
       <input type="text" id="review-company" name="company" tabindex="-1" autocomplete="off">
-
     </div>
 
-
-
-    <div id="review-step-details">
-
-      <div class="fg">
-
-        <label for="review-name">Your Name</label>
-
-        <input type="text" id="review-name" name="name" required maxlength="80" autocomplete="name" placeholder="Jane Smith">
-
-      </div>
-
-
-
-      <div class="fg">
-
-        <label for="review-email">Your Email</label>
-
-        <input type="email" id="review-email" name="email" required maxlength="120" autocomplete="email" placeholder="you@example.com">
-
-        <p class="field-hint">We send a one-time verification code to this address. Your email is not shown publicly.</p>
-
-      </div>
-
-
-
-      <div class="fg">
-
-        <span class="fg-label">Your Rating</span>
-
-        <div class="star-rating" role="radiogroup" aria-label="Rating">
-
-          <button type="button" class="star-rating__btn" data-value="1" aria-checked="false" aria-label="1 star">★</button>
-
-          <button type="button" class="star-rating__btn" data-value="2" aria-checked="false" aria-label="2 stars">★</button>
-
-          <button type="button" class="star-rating__btn" data-value="3" aria-checked="false" aria-label="3 stars">★</button>
-
-          <button type="button" class="star-rating__btn" data-value="4" aria-checked="false" aria-label="4 stars">★</button>
-
-          <button type="button" class="star-rating__btn" data-value="5" aria-checked="false" aria-label="5 stars">★</button>
-
-        </div>
-
-        <input type="hidden" name="rating" value="">
-
-      </div>
-
-
-
-      <div class="fg">
-
-        <label for="review-text">Your Review</label>
-
-        <textarea id="review-text" name="text" rows="6" required maxlength="2000" placeholder="Tell us about your experience..."></textarea>
-
-      </div>
-
-
-
-      <button type="button" id="review-send-code-btn" class="form-submit-btn">Send Verification Email</button>
-
+    <div class="fg">
+      <label for="review-name">Your Name</label>
+      <input type="text" id="review-name" name="name" required maxlength="80" autocomplete="name" placeholder="Jane Smith">
     </div>
 
-
-
-    <div id="review-step-verify" hidden>
-
-      <p class="review-verify-intro">Enter the 6-digit code we sent to <strong id="review-verify-email"></strong></p>
-
-
-
-      <div class="fg">
-
-        <label for="review-code">Verification Code</label>
-
-        <input type="text" id="review-code" name="code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="123456">
-
-      </div>
-
-
-
-      <button type="submit" class="form-submit-btn">Verify Email &amp; Submit Review</button>
-
-
-
-      <div class="review-verify-actions">
-
-        <button type="button" id="review-resend-code" class="review-link-btn">Resend code</button>
-
-        <button type="button" id="review-edit-details" class="review-link-btn">Edit review</button>
-
-      </div>
-
+    <div class="fg">
+      <label for="review-email">Your Email</label>
+      <input type="email" id="review-email" name="email" required maxlength="120" autocomplete="email" placeholder="you@example.com">
+      <p class="field-hint">Your email is sent to our team only and is not shown publicly.</p>
     </div>
 
+    <div class="fg">
+      <span class="fg-label">Your Rating</span>
+      <div class="star-rating" role="radiogroup" aria-label="Rating">
+        <button type="button" class="star-rating__btn" data-value="1" aria-checked="false" aria-label="1 star">★</button>
+        <button type="button" class="star-rating__btn" data-value="2" aria-checked="false" aria-label="2 stars">★</button>
+        <button type="button" class="star-rating__btn" data-value="3" aria-checked="false" aria-label="3 stars">★</button>
+        <button type="button" class="star-rating__btn" data-value="4" aria-checked="false" aria-label="4 stars">★</button>
+        <button type="button" class="star-rating__btn" data-value="5" aria-checked="false" aria-label="5 stars">★</button>
+      </div>
+      <input type="hidden" name="rating" value="">
+    </div>
 
+    <div class="fg">
+      <label for="review-text">Your Review</label>
+      <textarea id="review-text" name="text" rows="6" required maxlength="2000" placeholder="Tell us about your experience..."></textarea>
+    </div>
 
+    <button type="submit" class="form-submit-btn">Submit Review</button>
     <p class="review-form-message" aria-live="polite"></p>
-
   </form>
-
-
-
-  <div class="review-external">
-
-    <p class="review-external__title">Leave a review on Google (appears on Google, not this website):</p>
-
-    <div class="review-platforms">
-
-      <a class="review-platform" href="https://search.google.com/local/writereview?placeid=ChIJgxBm5BSVxokRzDPdSMCUzT4" target="_blank" rel="noopener">Google</a>
-
-      <a class="review-platform" href="https://www.yelp.com/writeareview/biz/pX4U_wukIZkETzMGWr57Wg?return_url=%2Fbiz%2FpX4U_wukIZkETzMGWr57Wg" target="_blank" rel="noopener">Yelp</a>
-
-      <a class="review-platform" href="https://www.facebook.com/LaserSkinSurgeryPA/reviews" target="_blank" rel="noopener">Facebook</a>
-
-    </div>
-
-  </div>
-
 </div>
-
-
 
 </main>
 
-
-
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-
-<script src="../assets/js/site-layout.js"></script>
-
-<script src="../assets/js/main.js"></script>
-
 <script src="../assets/js/site-config.js"></script>
-
+<script src="../assets/js/forms.js"></script>
+<script src="../assets/js/site-layout.js"></script>
+<script src="../assets/js/main.js"></script>
 <script src="../assets/js/reviews.js"></script>
-
 </body>
-
 </html>
-

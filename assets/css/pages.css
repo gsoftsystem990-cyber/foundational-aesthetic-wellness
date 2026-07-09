@@ -33,14 +33,14 @@
 }
 .page-hero h1 {
   font-family: var(--font-display);
-  font-size: 48px;
-  font-weight: 400;
+  font-size: 54px;
+  font-weight: 600;
   color: #fff;
   margin-bottom: 8px;
 }
 .breadcrumbs {
-  font-family: 'Roboto', sans-serif;
-  font-size: 10px;
+  font-family: var(--font-nav);
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -57,27 +57,27 @@
 .page-body--narrow { max-width: 900px; }
 .page-body h2 {
   font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 400;
+  font-size: 42px;
+  font-weight: 600;
   color: var(--dark);
   margin-bottom: 20px;
 }
 .page-body p {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text2);
   line-height: 1.85;
   margin-bottom: 18px;
 }
 
 .page-body h3 {
-  font-family: 'Roboto', serif;
-  font-size: 22px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
   color: var(--dark);
   margin: 28px 0 14px;
 }
 .treatment-lead {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--dark);
 }
@@ -86,7 +86,7 @@
   padding-left: 20px;
 }
 .treatment-list li {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text2);
   line-height: 1.85;
   margin-bottom: 8px;
@@ -129,14 +129,14 @@
 }
 .provider-card__body { padding: 24px; }
 .provider-card__body h3 {
-  font-family: 'Roboto', serif;
+  font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
   color: var(--dark);
   margin-bottom: 8px;
 }
 .provider-card__role {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-nav);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 1px;
@@ -163,7 +163,7 @@
   background: var(--offwhite);
 }
 .link-card h3 {
-  font-family: 'Roboto', serif;
+  font-family: var(--font-display);
   font-size: 20px;
   color: var(--dark);
 }
@@ -206,6 +206,31 @@
   line-height: 1.7;
 }
 .review-info-box p { margin: 0; }
+.approve-status {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--dark);
+  margin: 24px 0 12px;
+}
+.approve-status--success { color: #2d6a4f; }
+.approve-status--error { color: #b42318; }
+.approve-status--info { color: var(--dark); }
+.approve-detail {
+  font-size: 16px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+.approve-preview {
+  margin: 16px 0 28px;
+  padding: 18px 20px;
+  background: #f7f5f0;
+  border-left: 3px solid var(--gold);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--dark);
+}
 .review-honeypot {
   position: absolute;
   left: -9999px;
@@ -215,7 +240,7 @@
 }
 .field-hint {
   margin: 6px 0 0;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: #888;
   line-height: 1.5;
@@ -236,7 +261,7 @@
   background: none;
   border: none;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-nav);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -255,7 +280,7 @@
 .testi-source {
   display: inline-block;
   margin-top: 8px;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-nav);
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -277,7 +302,7 @@
 }
 .review-form .fg-label {
   display: block;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-nav);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -308,7 +333,7 @@
 }
 .review-form-message {
   margin-top: 16px;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   min-height: 1.4em;
 }
@@ -320,7 +345,7 @@
   border-top: 1px solid #e8e3d8;
 }
 .review-external__title {
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-nav);
   font-size: 13px;
   font-weight: 600;
   color: #666;
@@ -342,8 +367,9 @@
   border: 1px solid #e8e3d8;
 }
 .testi-grid--page .testi-text { color: var(--text); }
+.testi-grid--page .testi-author { color: var(--gold); }
 .testi-grid--page .testi-date {
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   color: #999;
   margin-top: 8px;
@@ -362,7 +388,7 @@
   justify-content: center;
   min-height: 100px;
   border: 1px solid #e8e3d8;
-  font-family: 'Roboto', sans-serif;
+  font-family: var(--font-nav);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
