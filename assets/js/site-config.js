@@ -7,6 +7,9 @@
 window.FAW_SITE_CONFIG = {
   notifyEmail: 'malikkhan0225@gmail.com',
 
+  // Optional: get a free access key at https://web3forms.com (more reliable than FormSubmit alone)
+  web3formsAccessKey: '',
+
   // Live public website URL (GitHub Pages).
   // Leave empty to auto-detect on github.io, or run deploy-github-pages.ps1 to set this.
   publicSiteUrl: 'https://gsoftsystem990-cyber.github.io/foundational-aesthetic-wellness/',

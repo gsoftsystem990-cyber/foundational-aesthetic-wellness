@@ -355,17 +355,24 @@
   }
 
   async function notifyOwnerForApproval(review, approveUrl) {
+    var siteUrl = publicSiteBase();
     var body = {
-      _template: 'table',
-      _captcha: 'false',
-      _subject: 'ACTION NEEDED: Approve website review',
-      _replyto: review.email,
+      _subject: 'ACTION NEEDED: Approve review from ' + review.name,
+      _url: siteUrl + '/pages/leave-a-review.html',
       type: 'Review Pending Approval',
       patient_name: review.name,
       patient_email: review.email,
       rating: review.rating + ' / 5 stars',
       review_text: review.text,
-      how_to_approve: 'Open / click the Approve Link to publish this review on the website. If you ignore this email, it will NOT appear on the site.',
+      message:
+        'A new patient review is waiting for approval.\n\n' +
+        'Patient: ' + review.name + '\n' +
+        'Email: ' + review.email + '\n' +
+        'Rating: ' + review.rating + ' / 5\n\n' +
+        'Review:\n' + review.text + '\n\n' +
+        'APPROVE LINK (copy and open in your browser if the button does not work):\n' +
+        approveUrl + '\n\n' +
+        'The review will NOT appear on the website until you open the link and click Approve.',
       approve_link: approveUrl
     };
 
@@ -380,11 +387,18 @@
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(Object.assign({ _template: 'table', _captcha: 'false' }, body))
     });
 
-    if (!res.ok) {
-      throw new Error('Could not send your review for approval. Please try again.');
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok || (data && (data.success === 'false' || data.success === false))) {
+      var msg = (data && data.message) || 'Could not send your review for approval. Please try again.';
+      if (/activation|activate form/i.test(msg)) {
+        msg =
+          'One-time email setup is required. Check ' + notifyEmail +
+          ' (and spam) for a FormSubmit activation email, click the link, then submit again.';
+      }
+      throw new Error(msg);
     }
   }
 

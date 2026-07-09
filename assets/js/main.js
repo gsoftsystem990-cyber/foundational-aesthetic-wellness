@@ -28,16 +28,12 @@ async function sendSiteEmail(payload) {
     body: JSON.stringify(body)
   });
 
-  if (!res.ok) {
-    var errText = '';
-    try {
-      var data = await res.json();
-      errText = data.message || '';
-    } catch (e) { /* ignore */ }
-    throw new Error(errText || 'Unable to send. Please try again.');
+  var data = await res.json().catch(function () { return {}; });
+  if (!res.ok || (data && (data.success === 'false' || data.success === false))) {
+    throw new Error((data && data.message) || 'Unable to send. Please try again.');
   }
 
-  return res.json().catch(function () { return {}; });
+  return data;
 }
 
 async function submitForm(e) {
