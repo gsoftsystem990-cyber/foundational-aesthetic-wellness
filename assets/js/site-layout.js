@@ -24,6 +24,7 @@
     { name: "Skin Rejuvenation & Acne Care", page: "skin-rejuvenation-acne-care.html" },
     { name: "Lip Enhancement — Fotona LipLase", page: "lip-enhancement-liplase.html" },
     { name: "Eye Rejuvenation — Fotona SmoothEye", page: "eye-rejuvenation-smootheye.html" },
+    { name: "EyeLase™ Non-Surgical Eye Lift", page: "eyelase-eye-lift.html" },
     { name: "Laser Hair Removal", page: "laser-hair-removal.html" }
   ];
 
@@ -85,6 +86,7 @@
     '<a href="' + page("skin-rejuvenation-acne-care.html") + '" onclick="closeMNav()">Skin Rejuvenation &amp; Acne Care</a>' +
     '<a href="' + page("lip-enhancement-liplase.html") + '" onclick="closeMNav()">Lip Enhancement — LipLase</a>' +
     '<a href="' + page("eye-rejuvenation-smootheye.html") + '" onclick="closeMNav()">Eye Rejuvenation — SmoothEye</a>' +
+    '<a href="' + page("eyelase-eye-lift.html") + '" onclick="closeMNav()">EyeLase™ Eye Lift</a>' +
     '<a href="' + page("laser-hair-removal.html") + '" onclick="closeMNav()">Laser Hair Removal</a>' +
     '<div class="mnav-section">Quick Links</div>' +
     '<a href="' + page("contact.html") + '" onclick="closeMNav()">Contact</a>' +
@@ -115,6 +117,7 @@
     '<option>Skin Rejuvenation &amp; Acne Care</option>' +
     '<option>Lip Enhancement — Fotona LipLase</option>' +
     '<option>Eye Rejuvenation — Fotona SmoothEye</option>' +
+    '<option>EyeLase™ Non-Surgical Eye Lift</option>' +
     '<option>Laser Hair Removal</option>' +
     '<option>Other / Consultation</option>' +
     '</select></div>' +
@@ -141,6 +144,7 @@
     '<li><a href="' + page("skin-rejuvenation-acne-care.html") + '">Skin Rejuvenation &amp; Acne Care</a></li>' +
     '<li><a href="' + page("lip-enhancement-liplase.html") + '">Lip Enhancement — LipLase</a></li>' +
     '<li><a href="' + page("eye-rejuvenation-smootheye.html") + '">Eye Rejuvenation — SmoothEye</a></li>' +
+    '<li><a href="' + page("eyelase-eye-lift.html") + '">EyeLase™ Eye Lift</a></li>' +
     '<li><a href="' + page("laser-hair-removal.html") + '">Laser Hair Removal</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Our Providers</h4><ul>' +
