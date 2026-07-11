@@ -391,6 +391,11 @@ img{max-width:100%;display:block}
   color:var(--gold);line-height:1;
   margin-bottom:8px;
 }
+.stat-num--text{
+  font-size:28px;
+  line-height:1.15;
+  letter-spacing:0.02em;
+}
 .stat-label{
   font-family:var(--font-nav);
   font-size:10px;font-weight:600;
@@ -972,6 +977,7 @@ footer{
   .hero-sub{font-size:10px;letter-spacing:2px;margin-bottom:28px}
   .hero-eyebrow{font-size:9px;letter-spacing:3px}
   .stat-num{font-size:40px}
+  .stat-num--text{font-size:22px}
   .stat-label{font-size:9px}
   .stats-bar{padding:28px 16px}
   .section-title-center{font-size:28px}

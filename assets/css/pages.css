@@ -145,6 +145,42 @@
   gap: 24px;
   margin-top: 40px;
 }
+.provider-feature {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 40px;
+  align-items: start;
+}
+.provider-feature__img {
+  margin: 0;
+  border: 1px solid #e8e3d8;
+  overflow: hidden;
+  background: #f7f4ee;
+}
+.provider-feature__img img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 4 / 5;
+}
+.provider-feature__body h2 {
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+.provider-feature__body .provider-card__role {
+  margin-bottom: 8px;
+}
+@media (max-width: 800px) {
+  .provider-feature {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .provider-feature__img img {
+    aspect-ratio: 1 / 1;
+    max-height: 420px;
+  }
+}
 .provider-card {
   border: 1px solid #e8e3d8;
   background: #fff;
