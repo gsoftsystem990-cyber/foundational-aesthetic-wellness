@@ -48,7 +48,10 @@
     '<span class="logo-line3">foundationalaestheticwellness.com</span></a>' +
     '<nav class="main-nav">' +
     '<div class="nav-item"><a href="' + home + '" class="nav-link">Home</a></div>' +
-    '<div class="nav-item"><a href="' + page("providers.html") + '" class="nav-link">Our Provider</a></div>' +
+    '<div class="nav-item"><a href="' + page("providers.html") + '" class="nav-link">Our Providers <span class="chevron"></span></a>' +
+    '<div class="dropdown">' +
+    '<a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a>' +
+    "</div></div>" +
     '<div class="nav-item"><a href="' + page("about-us.html") + '" class="nav-link">About <span class="chevron"></span></a>' +
     '<div class="dropdown">' +
     '<a href="' + page("about-us.html") + '">About Us</a>' +
@@ -67,8 +70,8 @@
     '<button class="mnav-close" onclick="closeMNav()" aria-label="Close menu">\u2715</button></div>' +
     '<div class="mnav-links">' +
     '<a href="' + home + '" onclick="closeMNav()">Home</a>' +
-    '<div class="mnav-section">Our Provider</div>' +
-    '<a href="' + page("providers.html") + '" onclick="closeMNav()">Lexi Lojewski</a>' +
+    '<div class="mnav-section">Our Providers</div>' +
+    '<a href="' + page("lexi-lojewski.html") + '" onclick="closeMNav()">Lexi Lojewski</a>' +
     '<div class="mnav-section">About</div>' +
     '<a href="' + page("about-us.html") + '" onclick="closeMNav()">About Us</a>' +
     '<a href="' + page("our-practice.html") + '" onclick="closeMNav()">Our Practice</a>' +
@@ -140,10 +143,8 @@
     '<li><a href="' + page("eyelase-eye-lift.html") + '">EyeLase™ Eye Lift</a></li>' +
     '<li><a href="' + page("laser-hair-removal.html") + '">Laser Hair Removal</a></li>' +
     "</ul></div>" +
-    '<div class="footer-col"><h4>Our Provider</h4><ul>' +
-    '<li><a href="' + page("providers.html") + '">Lexi Lojewski</a></li>' +
-    '<li><a href="' + page("providers.html") + '">Medical Licensed Esthetician</a></li>' +
-    '<li><a href="' + page("providers.html") + '">Certified Laser Technician</a></li>' +
+    '<div class="footer-col"><h4>Our Providers</h4><ul>' +
+    '<li><a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Contact</h4><ul>' +
     '<li><a href="https://maps.app.goo.gl/FrP8BQQtknxPzfUM8" target="_blank" rel="noopener">92 Lancaster Avenue</a></li>' +
