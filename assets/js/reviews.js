@@ -1,6 +1,6 @@
 (function () {
-  var APPROVED_KEY = 'faw_approved_reviews_v2';
-  var LEGACY_KEY = 'faw_patient_reviews';
+  var STORAGE_KEY = 'faw_approved_reviews_v3';
+  var ADMIN_BIN_KEY = 'faw_jsonbin_key_v1';
   var config = window.FAW_SITE_CONFIG || {};
   var approveSecret = config.reviewApproveSecret || 'faw-approve-2026-mkhan';
   var notifyEmail = config.notifyEmail || 'malikkhan0225@gmail.com';
@@ -11,9 +11,9 @@
     return [];
   }
 
-  function readLocalApproved() {
+  function readLocalCache() {
     try {
-      var raw = localStorage.getItem(APPROVED_KEY);
+      var raw = localStorage.getItem(STORAGE_KEY);
       var parsed = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
@@ -21,39 +21,17 @@
     }
   }
 
-  function writeLocalApproved(list) {
-    localStorage.setItem(APPROVED_KEY, JSON.stringify(list));
-  }
-
-  function upsertLocal(review) {
-    var list = readLocalApproved().filter(function (r) { return r && r.id !== review.id; });
-    list.unshift(review);
-    writeLocalApproved(list);
-    return list;
-  }
-
-  function readLegacyLocal() {
+  function writeLocalCache(list) {
     try {
-      var raw = localStorage.getItem(LEGACY_KEY);
-      var parsed = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(parsed)) return emptyList();
-      return parsed.filter(function (r) {
-        return r && r.verified !== false && r.name && r.text && r.rating;
-      }).map(function (r) {
-        return {
-          id: r.id || ('legacy_' + Date.now()),
-          name: r.name,
-          email: r.email || '',
-          rating: Number(r.rating),
-          text: r.text,
-          date: r.date || new Date().toISOString(),
-          verified: true,
-          source: 'site'
-        };
-      });
-    } catch (e) {
-      return emptyList();
-    }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list || []));
+    } catch (e) { /* ignore quota */ }
+  }
+
+  function clearLegacyCaches() {
+    try {
+      localStorage.removeItem('faw_approved_reviews_v2');
+      localStorage.removeItem('faw_patient_reviews');
+    } catch (e) { /* ignore */ }
   }
 
   function apiBase() {
@@ -79,21 +57,78 @@
     return window.location.hostname.endsWith('github.io');
   }
 
-  function hasCloudStorage() {
-    return !!(reviewsBinId && reviewsBinKey);
+  function isLocalHost() {
+    var h = window.location.hostname;
+    return h === '127.0.0.1' || h === 'localhost';
+  }
+
+  function getWriteKey() {
+    if (reviewsBinKey) return reviewsBinKey;
+    try {
+      return String(localStorage.getItem(ADMIN_BIN_KEY) || '').trim();
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function setWriteKey(key) {
+    try {
+      localStorage.setItem(ADMIN_BIN_KEY, String(key || '').trim());
+    } catch (e) { /* ignore */ }
+  }
+
+  function hasCloudBin() {
+    return !!reviewsBinId;
+  }
+
+  function canWriteCloud() {
+    return hasCloudBin() && !!getWriteKey();
+  }
+
+  function normalizeList(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.approved)) return data.approved;
+    if (data && Array.isArray(data.record)) return data.record;
+    return emptyList();
+  }
+
+  function cleanReview(review) {
+    if (!review || !review.id || !review.name || !review.text || !review.rating) return null;
+    return {
+      id: String(review.id),
+      name: String(review.name).trim(),
+      email: String(review.email || '').trim().toLowerCase(),
+      rating: Number(review.rating),
+      text: String(review.text).trim(),
+      date: review.date || new Date().toISOString(),
+      verified: true,
+      source: 'site',
+      approvedAt: review.approvedAt || ''
+    };
+  }
+
+  function mergeReviews() {
+    var map = {};
+    Array.prototype.slice.call(arguments).forEach(function (list) {
+      (list || []).forEach(function (item) {
+        var review = cleanReview(item);
+        if (review) map[review.id] = review;
+      });
+    });
+    return Object.keys(map).map(function (id) { return map[id]; }).sort(function (a, b) {
+      return String(b.date || '').localeCompare(String(a.date || ''));
+    });
   }
 
   async function fetchApiReviews() {
+    if (!isLocalHost()) return emptyList();
     try {
       var res = await fetch(apiBase() + '/api/reviews?_=' + Date.now(), {
         headers: { Accept: 'application/json' },
         cache: 'no-store'
       });
       if (!res.ok) return emptyList();
-      var data = await res.json();
-      if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.approved)) return data.approved;
-      return emptyList();
+      return normalizeList(await res.json());
     } catch (e) {
       return emptyList();
     }
@@ -101,40 +136,37 @@
 
   async function fetchSeededReviews() {
     var base = document.body.getAttribute('data-base') || '';
-    var url = base + 'assets/data/approved-reviews.json';
     try {
-      var res = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
+      var res = await fetch(base + 'assets/data/approved-reviews.json?_=' + Date.now(), {
+        cache: 'no-store'
+      });
       if (!res.ok) return emptyList();
-      var data = await res.json();
-      if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.approved)) return data.approved;
-      return emptyList();
+      return normalizeList(await res.json());
     } catch (e) {
       return emptyList();
     }
   }
 
   async function fetchCloudReviews() {
-    if (!reviewsBinId) return emptyList();
+    if (!hasCloudBin()) return emptyList();
     try {
       var headers = { Accept: 'application/json' };
-      if (reviewsBinKey) headers['X-Master-Key'] = reviewsBinKey;
+      var key = getWriteKey();
+      if (key) headers['X-Master-Key'] = key;
       var res = await fetch('https://api.jsonbin.io/v3/b/' + reviewsBinId + '/latest?_=' + Date.now(), {
         headers: headers,
         cache: 'no-store'
       });
       if (!res.ok) return emptyList();
       var data = await res.json();
-      var record = data.record;
-      if (Array.isArray(record)) return record;
-      if (record && Array.isArray(record.approved)) return record.approved;
-      return emptyList();
+      return normalizeList(data.record != null ? data.record : data);
     } catch (e) {
       return emptyList();
     }
   }
 
   async function saveApiReview(review) {
+    if (!isLocalHost()) return false;
     try {
       var res = await fetch(apiBase() + '/api/reviews', {
         method: 'POST',
@@ -146,9 +178,7 @@
       });
       if (!res.ok) return false;
       var data = await res.json();
-      if (data && Array.isArray(data.approved)) {
-        writeLocalApproved(data.approved);
-      }
+      if (data && Array.isArray(data.approved)) writeLocalCache(data.approved);
       return true;
     } catch (e) {
       return false;
@@ -156,57 +186,28 @@
   }
 
   async function saveCloudReview(review) {
-    if (!hasCloudStorage()) {
-      throw new Error(
-        'Review cloud storage is not configured. Run SETUP-REVIEWS-STORAGE.bat once, then DEPLOY-GITHUB-PAGES.bat.'
-      );
+    if (!canWriteCloud()) {
+      throw new Error('CLOUD_KEY_MISSING');
     }
-
     var current = await fetchCloudReviews();
     var list = mergeReviews(current, [review]);
-
     var res = await fetch('https://api.jsonbin.io/v3/b/' + reviewsBinId, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        'X-Master-Key': reviewsBinKey,
+        'X-Master-Key': getWriteKey(),
         'X-Bin-Versioning': 'false'
       },
       body: JSON.stringify(list)
     });
-
     if (!res.ok) {
       var errText = '';
       try { errText = await res.text(); } catch (e) { /* ignore */ }
       throw new Error(errText || 'Could not save the approved review online.');
     }
+    writeLocalCache(list);
     return true;
-  }
-
-  function mergeReviews() {
-    var map = {};
-    var args = Array.prototype.slice.call(arguments);
-    args.forEach(function (list) {
-      (list || []).forEach(function (review) {
-        if (!review || !review.id) return;
-        if (!review.name || !review.text || !review.rating) return;
-        map[review.id] = {
-          id: review.id,
-          name: String(review.name),
-          email: String(review.email || ''),
-          rating: Number(review.rating),
-          text: String(review.text),
-          date: review.date || '',
-          verified: true,
-          source: 'site',
-          approvedAt: review.approvedAt || ''
-        };
-      });
-    });
-    return Object.keys(map).map(function (id) { return map[id]; }).sort(function (a, b) {
-      return String(b.date || '').localeCompare(String(a.date || ''));
-    });
   }
 
   function starsHtml(rating) {
@@ -267,19 +268,19 @@
   }
 
   function buildApproveUrl(review) {
+    // Keep payload compact so email apps do not break the link
     var payload = {
       i: review.id,
-      n: review.name,
-      e: review.email,
+      n: String(review.name).slice(0, 80),
+      e: String(review.email || '').slice(0, 120),
       r: Number(review.rating),
-      t: review.text,
+      t: String(review.text).slice(0, 500),
       d: review.date
     };
     var encoded = toBase64Url(JSON.stringify(payload));
     var sig = signPayload(encoded);
-    var origin = publicSiteBase();
-    var page = origin + '/pages/approve-review.html';
-    return page + '?d=' + encodeURIComponent(encoded) + '&s=' + encodeURIComponent(sig);
+    return publicSiteBase() + '/pages/approve-review.html?d=' +
+      encodeURIComponent(encoded) + '&s=' + encodeURIComponent(sig);
   }
 
   function normalizeReviewData(raw) {
@@ -411,19 +412,17 @@
     var body = {
       _subject: 'ACTION NEEDED: Approve review from ' + review.name,
       _url: siteUrl + '/pages/leave-a-review.html',
+      _template: 'table',
+      _captcha: 'false',
       type: 'Review Pending Approval',
       patient_name: review.name,
       patient_email: review.email,
       rating: review.rating + ' / 5 stars',
       review_text: review.text,
       approve_link: approveUrl,
-      message:
-        'A new patient review is waiting for approval.\n\n' +
-        'Patient: ' + review.name + '\n' +
-        'Email: ' + review.email + '\n' +
-        'Rating: ' + review.rating + ' / 5\n\n' +
-        'Review:\n' + review.text + '\n\n' +
-        'OPEN THIS LINK TO APPROVE:\n' + approveUrl
+      important:
+        'Click the approve_link above. Then press "Approve & Publish Review" on the page. ' +
+        'The review will NOT appear until you complete that step.'
     };
 
     if (window.FAWForms && window.FAWForms.sendEmail) {
@@ -437,11 +436,11 @@
         'Content-Type': 'application/json',
         Accept: 'application/json'
       },
-      body: JSON.stringify(Object.assign({ _template: 'table', _captcha: 'false' }, body))
+      body: JSON.stringify(body)
     });
 
     var data = await res.json().catch(function () { return {}; });
-    if (!res.ok || (data && (data.success === 'false' || data.success === false))) {
+    if (!res.ok || data.success === 'false' || data.success === false) {
       var msg = (data && data.message) || 'Could not send your review for approval. Please try again.';
       if (/activation|activate form/i.test(msg)) {
         msg =
@@ -453,38 +452,89 @@
   }
 
   async function publishReview(data) {
-    var review = {
+    var review = cleanReview({
       id: data.id,
-      name: String(data.name).trim(),
-      email: String(data.email || '').trim().toLowerCase(),
-      rating: Number(data.rating),
-      text: String(data.text).trim(),
+      name: data.name,
+      email: data.email,
+      rating: data.rating,
+      text: data.text,
       date: data.date || new Date().toISOString(),
-      verified: true,
-      source: 'site',
       approvedAt: new Date().toISOString()
-    };
+    });
+    if (!review) throw new Error('Invalid review data.');
 
-    if (await saveApiReview(review)) {
-      upsertLocal(review);
-      return review;
-    }
+    // 1) Local preview server can write the JSON file directly
+    if (await saveApiReview(review)) return review;
 
-    if (hasCloudStorage()) {
+    // 2) Live GitHub Pages needs cloud storage so ALL visitors see the review
+    if (isGitHubPages() || hasCloudBin()) {
       await saveCloudReview(review);
-      upsertLocal(review);
       return review;
     }
 
+    // 3) Fallback for plain file open / unknown host: device-only (not public)
+    var local = mergeReviews(readLocalCache(), [review]);
+    writeLocalCache(local);
+    return review;
+  }
+
+  function storageHelpHtml() {
+    return (
+      '<div class="review-info-box" style="margin-top:18px">' +
+        '<p><strong>One-time setup required for live approvals</strong></p>' +
+        '<ol style="margin:10px 0 0 18px;color:#555;line-height:1.7">' +
+          '<li>On your PC open <code>SETUP-REVIEWS-STORAGE.bat</code></li>' +
+          '<li>Create a free key at <a href="https://jsonbin.io/app/api-keys" target="_blank" rel="noopener">jsonbin.io</a> and paste it</li>' +
+          '<li>Run <code>DEPLOY-GITHUB-PAGES.bat</code></li>' +
+          '<li>Come back to this email link and approve again</li>' +
+        '</ol>' +
+      '</div>'
+    );
+  }
+
+  function promptForCloudKey() {
+    var existing = getWriteKey();
+    if (existing) return existing;
+    if (!hasCloudBin()) return '';
+    var entered = window.prompt(
+      'Paste your JSONBin X-Master-Key to publish this review for all visitors.\n' +
+      '(Saved only in this browser for future approvals.)'
+    );
+    if (entered && entered.trim()) {
+      setWriteKey(entered.trim());
+      return entered.trim();
+    }
+    return '';
+  }
+
+  async function getPublicReviews() {
+    clearLegacyCaches();
+
+    var cloud = hasCloudBin() ? await fetchCloudReviews() : emptyList();
+    var seeded = await fetchSeededReviews();
+    var api = await fetchApiReviews();
+
+    // Live site: cloud is primary. Seeded file is fallback only when cloud is empty/unconfigured.
     if (isGitHubPages()) {
-      throw new Error(
-        'Review storage is not set up for the live website. ' +
-        'On your PC run SETUP-REVIEWS-STORAGE.bat once, then DEPLOY-GITHUB-PAGES.bat.'
-      );
+      if (hasCloudBin()) {
+        writeLocalCache(cloud);
+        return cloud;
+      }
+      writeLocalCache(seeded);
+      return seeded;
     }
 
-    upsertLocal(review);
-    return review;
+    // Local preview: API file + seed
+    if (isLocalHost()) {
+      var localLive = mergeReviews(api, seeded);
+      writeLocalCache(localLive);
+      return localLive;
+    }
+
+    // Unknown host: do not resurrect old caches if seed/cloud are empty
+    var merged = mergeReviews(cloud, seeded);
+    writeLocalCache(merged);
+    return merged;
   }
 
   async function approveReviewFromParams() {
@@ -505,7 +555,7 @@
     if (!data) {
       setStatus(
         'Invalid approval link',
-        'This link is missing data or was altered by the email app. Please open the latest approval email and click the full Approve Link.',
+        'This link is missing data or was altered by the email app. Open the latest approval email and click the full approve_link.',
         'error'
       );
       if (btn) btn.hidden = true;
@@ -516,7 +566,7 @@
     if (existing.some(function (r) { return r.id === data.id; })) {
       setStatus(
         'Already approved',
-        'This review was already published. You can view it on the Reviews page.',
+        'This review is already published on the website.',
         'success'
       );
       if (detailEl) {
@@ -524,6 +574,17 @@
           '<p class="approve-preview">"' + escapeHtml(data.text) + '"</p>' +
           '<p><a class="btn-gold" href="reviews.html">View Reviews</a></p>';
       }
+      if (btn) btn.hidden = true;
+      return;
+    }
+
+    if (isGitHubPages() && !hasCloudBin()) {
+      setStatus(
+        'Storage not configured',
+        'Email worked, but live publishing needs one-time cloud storage setup.',
+        'error'
+      );
+      if (detailEl) detailEl.innerHTML = storageHelpHtml();
       if (btn) btn.hidden = true;
       return;
     }
@@ -537,10 +598,15 @@
         btn.disabled = true;
         btn.textContent = 'Publishing…';
         try {
+          if ((isGitHubPages() || hasCloudBin()) && !canWriteCloud()) {
+            if (!promptForCloudKey()) {
+              throw new Error('A JSONBin key is required to publish this review for all visitors.');
+            }
+          }
           var review = await publishReview(data);
           setStatus(
             'Review approved',
-            review.name + ' — ' + review.rating + '/5 stars is now live on the website for all visitors.',
+            review.name + ' — ' + review.rating + '/5 stars is now live for all visitors.',
             'success'
           );
           if (detailEl) {
@@ -551,7 +617,12 @@
           }
           btn.hidden = true;
         } catch (err) {
-          setStatus('Could not approve review', err.message || 'Please try again.', 'error');
+          var msg = err && err.message ? err.message : 'Please try again.';
+          if (msg === 'CLOUD_KEY_MISSING') {
+            msg = 'JSONBin key missing. Run SETUP-REVIEWS-STORAGE.bat, deploy, then try again.';
+            if (detailEl) detailEl.innerHTML = storageHelpHtml();
+          }
+          setStatus('Could not approve review', msg, 'error');
           btn.disabled = false;
           btn.textContent = 'Approve & Publish Review';
           approving = false;
@@ -561,7 +632,7 @@
 
     setStatus(
       'Ready to approve',
-      data.name + ' rated ' + data.rating + '/5. Click the button below to publish this review on the website.',
+      data.name + ' rated ' + data.rating + '/5. Click below to publish this review on the website.',
       'info'
     );
     if (detailEl) {
@@ -621,7 +692,7 @@
         await notifyOwnerForApproval(review, approveUrl);
         showFormMessage(
           form,
-          'Thank you! Your review was sent for approval. It will appear on the website after our team confirms it.',
+          'Thank you! Your review was sent for approval. It will appear on the website only after our team opens the email and clicks Approve & Publish.',
           'success'
         );
         form.reset();
@@ -641,17 +712,6 @@
     });
   }
 
-  async function getPublicReviews() {
-    var cloud = hasCloudStorage() ? await fetchCloudReviews() : emptyList();
-    var api = await fetchApiReviews();
-    var seeded = await fetchSeededReviews();
-    var local = readLocalApproved();
-
-    var merged = mergeReviews(seeded, cloud, api, local);
-    writeLocalApproved(merged);
-    return merged;
-  }
-
   async function initDisplays() {
     var reviews = await getPublicReviews();
 
@@ -667,6 +727,8 @@
       renderStats(container, reviews);
     });
   }
+
+  clearLegacyCaches();
 
   if (document.getElementById('approve-status')) {
     approveReviewFromParams();
