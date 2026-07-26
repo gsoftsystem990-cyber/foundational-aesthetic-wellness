@@ -20,7 +20,7 @@
   var services = [
     { name: "Cosmetic Laser Treatment", page: "cosmetic-laser-treatment.html" },
     { name: "Dermaplaning & Microneedling", page: "dermaplaning-microneedling.html" },
-    { name: "Laser Esthetics & Snoring Solutions", page: "laser-esthetics-snoring-solutions.html" },
+    { name: "Laser Esthetics", page: "laser-esthetics.html" },
     { name: "Skin Rejuvenation & Acne Care", page: "skin-rejuvenation-acne-care.html" },
     { name: "Lip Enhancement — Fotona LipLase", page: "lip-enhancement-liplase.html" },
     { name: "Eye Rejuvenation — Fotona SmoothEye", page: "eye-rejuvenation-smootheye.html" },
@@ -78,7 +78,7 @@
     '<div class="mnav-section">Services</div>' +
     '<a href="' + page("cosmetic-laser-treatment.html") + '" onclick="closeMNav()">Cosmetic Laser Treatment</a>' +
     '<a href="' + page("dermaplaning-microneedling.html") + '" onclick="closeMNav()">Dermaplaning &amp; Microneedling</a>' +
-    '<a href="' + page("laser-esthetics-snoring-solutions.html") + '" onclick="closeMNav()">Laser Esthetics &amp; Snoring</a>' +
+    '<a href="' + page("laser-esthetics.html") + '" onclick="closeMNav()">Laser Esthetics</a>' +
     '<a href="' + page("skin-rejuvenation-acne-care.html") + '" onclick="closeMNav()">Skin Rejuvenation &amp; Acne Care</a>' +
     '<a href="' + page("lip-enhancement-liplase.html") + '" onclick="closeMNav()">Lip Enhancement — LipLase</a>' +
     '<a href="' + page("eye-rejuvenation-smootheye.html") + '" onclick="closeMNav()">Eye Rejuvenation — SmoothEye</a>' +
@@ -109,7 +109,7 @@
     '<option value="">Select a service...</option>' +
     '<option>Cosmetic Laser Treatment</option>' +
     '<option>Dermaplaning &amp; Microneedling</option>' +
-    '<option>Laser Esthetics &amp; Snoring Solutions</option>' +
+    '<option>Laser Esthetics</option>' +
     '<option>Skin Rejuvenation &amp; Acne Care</option>' +
     '<option>Lip Enhancement — Fotona LipLase</option>' +
     '<option>Eye Rejuvenation — Fotona SmoothEye</option>' +
@@ -128,7 +128,7 @@
     '<div class="footer-brand">' +
     '<div class="fb-logo">Foundational <em>Wellness</em></div>' +
     '<div class="fb-sub">foundationalaestheticwellness.com</div>' +
-    "<p>Expert aesthetic wellness, laser treatments, and cosmetic care in Devon, PA on the Main Line in the Philadelphia area.</p>" +
+    "<p>Expert aesthetic wellness, laser treatments, and cosmetic care in Collegeville, PA.</p>" +
     '<div class="social-row">' +
     '<a href="https://maps.app.goo.gl/FrP8BQQtknxPzfUM8" target="_blank" rel="noopener" class="soc-btn" title="Google">G</a>' +
     '<a href="https://www.facebook.com/LaserSkinSurgeryPA/" target="_blank" rel="noopener" class="soc-btn" title="Facebook">f</a>' +
@@ -147,8 +147,7 @@
     '<li><a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Contact</h4><ul>' +
-    '<li><a href="https://maps.app.goo.gl/FrP8BQQtknxPzfUM8" target="_blank" rel="noopener">92 Lancaster Avenue</a></li>' +
-    '<li><a href="https://maps.app.goo.gl/FrP8BQQtknxPzfUM8" target="_blank" rel="noopener">Suite 120, Devon, PA 19333</a></li>' +
+    '<li><a href="' + page("contact.html") + '">Collegeville, PA</a></li>' +
     '<li><a href="tel:+16109892224">610.989.2224</a></li>' +
     "</ul></div></div>" +
     "</footer>";
