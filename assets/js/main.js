@@ -204,7 +204,9 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     var t = document.querySelector(this.getAttribute('href'));
     if (t) {
       e.preventDefault();
-      window.scrollTo({ top: t.offsetTop - 100, behavior: 'smooth' });
+      var header = document.getElementById('header');
+      var offset = header ? header.getBoundingClientRect().height + 12 : 80;
+      window.scrollTo({ top: t.getBoundingClientRect().top + window.pageYOffset - offset, behavior: 'smooth' });
       closeMNav();
     }
   });
