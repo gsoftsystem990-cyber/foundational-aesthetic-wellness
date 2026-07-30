@@ -176,6 +176,12 @@
   object-fit: cover;
   aspect-ratio: 4 / 5;
 }
+.provider-feature__img--banner img {
+  aspect-ratio: auto;
+  object-fit: contain;
+  max-height: none;
+  background: #fff;
+}
 .provider-feature__body h2 {
   margin-top: 4px;
   margin-bottom: 16px;
@@ -191,6 +197,10 @@
   .provider-feature__img img {
     aspect-ratio: 1 / 1;
     max-height: 420px;
+  }
+  .provider-feature__img--banner img {
+    aspect-ratio: auto;
+    max-height: none;
   }
 }
 .provider-card {

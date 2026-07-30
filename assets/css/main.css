@@ -483,16 +483,20 @@ img{max-width:100%;height:auto;display:block}
 }
 .service-tile{
   position:relative;
+  display:block;
   background:#fff;
   border:1px solid #e8e3d8;
   overflow:hidden;
   transition:box-shadow .25s,transform .25s;
   cursor:pointer;
+  text-decoration:none;
+  color:inherit;
 }
 .service-tile:hover{
   box-shadow:0 12px 40px rgba(0,0,0,0.13);
   transform:translateY(-4px);
 }
+.service-tile:hover .tile-link{color:var(--gold2);border-color:var(--gold2)}
 .tile-img-wrap{
   position:relative;
   height:220px;
@@ -597,6 +601,13 @@ img{max-width:100%;height:auto;display:block}
   width:100%;height:580px;
   object-fit:cover;object-position:top;
   display:block;
+}
+.provider-img--banner{
+  height:auto;
+  max-height:none;
+  object-fit:contain;
+  object-position:center top;
+  background:#fff;
 }
 .provider-img-fallback{
   width:100%;height:580px;
@@ -968,6 +979,7 @@ footer{
   .welcome-img,.welcome-img-fallback{height:auto;aspect-ratio:4/3;object-fit:cover;width:100%}
   .provider-img-wrap{max-height:none}
   .provider-img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;object-position:center top}
+  .provider-img--banner{aspect-ratio:auto;object-fit:contain;height:auto}
   .contact-form-box{padding:28px 20px}
   .section-sub-center{padding:0 4px}
   .hero-overlay{

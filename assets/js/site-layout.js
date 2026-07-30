@@ -50,6 +50,7 @@
     '<div class="nav-item"><a href="' + home + '" class="nav-link">Home</a></div>' +
     '<div class="nav-item"><a href="' + page("providers.html") + '" class="nav-link">Our Providers <span class="chevron"></span></a>' +
     '<div class="dropdown">' +
+    '<a href="' + page("nelly-silva.html") + '">Dr. Nelly Silva</a>' +
     '<a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a>' +
     "</div></div>" +
     '<div class="nav-item"><a href="' + page("about-us.html") + '" class="nav-link">About <span class="chevron"></span></a>' +
@@ -71,6 +72,7 @@
     '<div class="mnav-links">' +
     '<a href="' + home + '" onclick="closeMNav()">Home</a>' +
     '<div class="mnav-section">Our Providers</div>' +
+    '<a href="' + page("nelly-silva.html") + '" onclick="closeMNav()">Dr. Nelly Silva</a>' +
     '<a href="' + page("lexi-lojewski.html") + '" onclick="closeMNav()">Lexi Lojewski</a>' +
     '<div class="mnav-section">About</div>' +
     '<a href="' + page("about-us.html") + '" onclick="closeMNav()">About Us</a>' +
@@ -144,6 +146,7 @@
     '<li><a href="' + page("laser-hair-removal.html") + '">Laser Hair Removal</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Our Providers</h4><ul>' +
+    '<li><a href="' + page("nelly-silva.html") + '">Dr. Nelly Silva</a></li>' +
     '<li><a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Contact</h4><ul>' +
