@@ -1,5 +1,6 @@
 (function () {
   var CARD_LIKE = /\b(?:\d[ -]*?){13,19}\b/;
+  var UNAVAILABLE = "Online payment is currently unavailable.";
 
   function apiBase() {
     var config = window.FAW_SITE_CONFIG || {};
@@ -31,11 +32,24 @@
       phone: val("mem-ph"),
       dob: val("mem-dob"),
       existingPatient: val("mem-existing"),
+      patientChartId: val("mem-chart"),
       plan: val("mem-plan"),
       family: val("mem-family"),
       notes: val("mem-notes"),
       company_website: val("mem-hp")
     };
+  }
+
+  async function paymentReady() {
+    var base = apiBase();
+    if (!base) return { ok: false, mode: "unavailable" };
+    try {
+      var res = await fetch(base + "/public-status", { headers: { Accept: "application/json" } });
+      var json = await res.json().catch(function () { return {}; });
+      return { ok: Boolean(json.paymentAvailable), mode: json.mode || "unavailable" };
+    } catch (err) {
+      return { ok: false, mode: "unavailable" };
+    }
   }
 
   async function onSubmit(e) {
@@ -53,9 +67,9 @@
       return;
     }
 
-    var base = apiBase();
-    if (!base) {
-      setMsg("Secure checkout is not connected yet. Call 610.989.2224 to enroll, or start the payment server and set membershipApiUrl.", true);
+    var status = await paymentReady();
+    if (!status.ok) {
+      setMsg(UNAVAILABLE, true);
       return;
     }
 
@@ -66,21 +80,22 @@
     setMsg("", false);
 
     try {
-      var res = await fetch(base + "/create-checkout-session", {
+      var res = await fetch(apiBase() + "/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(data)
       });
       var json = await res.json().catch(function () { return {}; });
+      if (res.status === 503) throw new Error(UNAVAILABLE);
       if (!res.ok || !json.url) {
-        throw new Error(json.error || "Unable to start checkout.");
+        throw new Error(json.error || UNAVAILABLE);
       }
       if (json.url.indexOf("https://checkout.stripe.com/") !== 0) {
-        throw new Error("Checkout URL was rejected for security.");
+        throw new Error(UNAVAILABLE);
       }
       window.location.assign(json.url);
     } catch (err) {
-      setMsg(err.message || "Unable to start checkout.", true);
+      setMsg(err.message || UNAVAILABLE, true);
       if (btn) {
         btn.disabled = false;
         btn.textContent = "Continue to secure payment";
@@ -88,6 +103,16 @@
     }
   }
 
-  var form = document.getElementById("membershipForm");
-  if (form) form.addEventListener("submit", onSubmit);
+  async function init() {
+    var form = document.getElementById("membershipForm");
+    if (form) form.addEventListener("submit", onSubmit);
+    var status = await paymentReady();
+    var note = document.getElementById("membershipDevNote");
+    if (note && !status.ok) {
+      note.hidden = false;
+      note.textContent = "Development: Stripe test keys are not configured on the payment server yet. " + UNAVAILABLE;
+    }
+  }
+
+  init();
 })();

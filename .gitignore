@@ -6,3 +6,5 @@ Thumbs.db
 !.env.example
 server/node_modules/
 server/data/
+*.db
+*.sqlite

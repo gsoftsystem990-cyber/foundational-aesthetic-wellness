@@ -40,7 +40,7 @@
     </article>
     <article>
       <h3>3. Save immediately</h3>
-      <p>Membership is active after payment. Front desk applies member pricing on eligible visits.</p>
+      <p>Membership is pending until Stripe confirms payment to our server. The success page alone does not activate it.</p>
     </article>
     <article>
       <h3>4. Auto-renew</h3>
@@ -76,6 +76,10 @@
         </div>
       </div>
       <div class="fg">
+        <label for="mem-chart">Existing chart / patient ID (if you have it)</label>
+        <input type="text" id="mem-chart" name="patientChartId" maxlength="40" autocomplete="off" placeholder="Optional — helps match your record">
+      </div>
+      <div class="fg">
         <label for="mem-plan">Membership *</label>
         <select id="mem-plan" name="plan" required>
           <option value="">Select…</option>
@@ -94,6 +98,7 @@
       <p class="membership-legal">By continuing you agree this is a practice membership / discount plan, not dental or medical insurance. You will complete payment on Stripe. Membership renews annually until canceled.</p>
       <button type="submit" class="form-submit-btn" id="membershipSubmit">Continue to secure payment</button>
       <p class="membership-msg" id="membershipMsg" hidden></p>
+      <p class="membership-msg" id="membershipDevNote" hidden></p>
     </form>
   </div>
 </div>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Membership admin</title>
+<style>
+  body { font-family: sans-serif; margin: 32px; color: #222; background: #f7f8f4; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; text-align: left; }
+  .bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  button, select { padding: 8px 12px; }
+  #login { max-width: 360px; background: #fff; padding: 24px; }
+  label { display: block; margin: 12px 0 4px; }
+  input { width: 100%; padding: 8px; box-sizing: border-box; }
+  .err { color: #8a2a2a; }
+</style>
+</head>
+<body>
+<div id="login">
+  <h1>Staff login</h1>
+  <form id="loginForm">
+    <label for="user">Username</label>
+    <input id="user" name="username" autocomplete="username" required>
+    <label for="pass">Password</label>
+    <input id="pass" name="password" type="password" autocomplete="current-password" required>
+    <p><button type="submit">Sign in</button></p>
+    <p class="err" id="loginErr" hidden></p>
+  </form>
+</div>
+<div id="dash" hidden>
+  <h1>Memberships</h1>
+  <div class="bar">
+    <select id="status">
+      <option value="">All</option>
+      <option>pending</option>
+      <option>active</option>
+      <option>past_due</option>
+      <option>cancelled</option>
+      <option>expired</option>
+      <option>payment_failed</option>
+    </select>
+    <button type="button" id="refresh">Refresh</button>
+    <button type="button" id="logout">Sign out</button>
+  </div>
+  <p>Card numbers are never stored. Patient names are for chart matching only.</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Plan</th>
+        <th>Patient ref</th>
+        <th>Name</th>
+        <th>Start</th>
+        <th>Renewal</th>
+        <th>Membership ID</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+<script>
+(function () {
+  var csrf = "";
+  function show(err) {
+    var el = document.getElementById("loginErr");
+    el.hidden = !err;
+    el.textContent = err || "";
+  }
+  async function load() {
+    var status = document.getElementById("status").value;
+    var url = "/admin/api/memberships" + (status ? ("?status=" + encodeURIComponent(status)) : "");
+    var res = await fetch(url, { credentials: "same-origin" });
+    if (res.status === 401) {
+      document.getElementById("dash").hidden = true;
+      document.getElementById("login").hidden = false;
+      return;
+    }
+    var data = await res.json();
+    csrf = data.csrf || csrf;
+    var body = document.getElementById("rows");
+    body.innerHTML = "";
+    (data.memberships || []).forEach(function (row) {
+      var tr = document.createElement("tr");
+      [row.status, row.membership_plan_id, row.patient_id, (row.first_name || "") + " " + (row.last_name || ""), row.start_date || "", row.renewal_date || "", row.membership_id].forEach(function (cell) {
+        var td = document.createElement("td");
+        td.textContent = cell;
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    document.getElementById("login").hidden = true;
+    document.getElementById("dash").hidden = false;
+  }
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    show("");
+    var res = await fetch("/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify({
+        username: document.getElementById("user").value,
+        password: document.getElementById("pass").value
+      })
+    });
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) {
+      show("Sign-in failed.");
+      return;
+    }
+    csrf = data.csrf || "";
+    document.getElementById("pass").value = "";
+    load();
+  });
+  document.getElementById("refresh").addEventListener("click", load);
+  document.getElementById("status").addEventListener("change", load);
+  document.getElementById("logout").addEventListener("click", async function () {
+    await fetch("/admin/logout", {
+      method: "POST",
+      headers: { "X-CSRF-Token": csrf },
+      credentials: "same-origin"
+    });
+    location.reload();
+  });
+  load().catch(function () {});
+})();
+</script>
+</body>
+</html>

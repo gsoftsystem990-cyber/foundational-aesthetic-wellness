@@ -56,6 +56,7 @@ function validateEnrollment(body) {
   var plan = str(body.plan, 20).toLowerCase();
   var family = str(body.family, 400);
   var notes = str(body.notes, 500);
+  var patientChartId = str(body.patientChartId, 40).replace(/[^A-Za-z0-9-_]/g, "");
 
   if (!NAME_RE.test(firstName) || !NAME_RE.test(lastName)) {
     return { error: "Please enter a valid first and last name." };
@@ -86,7 +87,8 @@ function validateEnrollment(body) {
       existingPatient: existingPatient,
       plan: plan,
       family: family,
-      notes: notes
+      notes: notes,
+      patientChartId: patientChartId
     }
   };
 }
