@@ -62,6 +62,7 @@
     '<div class="dropdown">' +
     serviceLinks() +
     "</div></div>" +
+    '<div class="nav-item"><a href="' + page("membership.html") + '" class="nav-link">Membership</a></div>' +
     '<div class="nav-item"><a href="' + page("contact.html") + '" class="nav-link">Contact</a></div>' +
     "</nav>" +
     '<button class="hamburger" onclick="openMNav()" aria-label="Menu"><span></span><span></span><span></span></button>' +
@@ -87,6 +88,7 @@
     '<a href="' + page("eyelase-eye-lift.html") + '" onclick="closeMNav()">EyeLase™ Eye Lift</a>' +
     '<a href="' + page("laser-hair-removal.html") + '" onclick="closeMNav()">Laser Hair Removal</a>' +
     '<div class="mnav-section">Quick Links</div>' +
+    '<a href="' + page("membership.html") + '" onclick="closeMNav()">Membership Plan</a>' +
     '<a href="' + page("contact.html") + '" onclick="closeMNav()">Contact</a>' +
     '<a href="tel:+16109892224">\ud83d\udcde 610.989.2224</a>' +
     '<button type="button" class="mnav-book" data-open-book-modal onclick="closeMNav()">Book an Appointment</button>' +
@@ -149,7 +151,8 @@
     '<li><a href="' + page("nelly-silva.html") + '">Dr. Nelly Silva</a></li>' +
     '<li><a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a></li>' +
     "</ul></div>" +
-    '<div class="footer-col"><h4>Contact</h4><ul>' +
+    '<div class="footer-col"><h4>Patients</h4><ul>' +
+    '<li><a href="' + page("membership.html") + '">Membership Plan</a></li>' +
     '<li><a href="' + page("contact.html") + '">Collegeville, PA</a></li>' +
     '<li><a href="tel:+16109892224">610.989.2224</a></li>' +
     "</ul></div></div>" +

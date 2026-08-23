@@ -19,6 +19,10 @@ window.FAW_SITE_CONFIG = {
   // Live public website URL (GitHub Pages).
   publicSiteUrl: 'https://gsoftsystem990-cyber.github.io/foundational-aesthetic-wellness/',
 
+  // Membership checkout API (Node server). Leave empty on GitHub Pages until
+  // the Stripe server is deployed. Local: http://localhost:4242
+  membershipApiUrl: '',
+
   // Used to verify approve links from email
   reviewApproveSecret: 'faw-approve-2026-mkhan',
 

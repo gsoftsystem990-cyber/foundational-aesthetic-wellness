@@ -581,3 +581,50 @@
   .approve-status { font-size: 22px; }
   .approve-preview { font-size: 15px; }
 }
+
+.membership-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin: 8px 0 48px;
+}
+.membership-steps article {
+  background: var(--offwhite);
+  padding: 22px 18px;
+  border: 1px solid var(--border);
+}
+.membership-steps h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+.membership-steps p {
+  font-size: 14px;
+  margin: 0;
+}
+.membership-form-box { max-width: 720px; }
+.membership-secure-note {
+  font-size: 14px;
+  color: var(--text2);
+  background: var(--offwhite2);
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+.membership-legal {
+  font-size: 13px;
+  color: var(--text2);
+  margin: 8px 0 16px;
+}
+.membership-msg { margin-top: 12px; font-size: 14px; }
+.membership-msg--error { color: #8a2a2a; }
+.membership-hp {
+  position: absolute;
+  left: -9999px;
+  height: 0;
+  overflow: hidden;
+}
+@media (max-width: 900px) {
+  .membership-steps { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .membership-steps { grid-template-columns: 1fr; }
+}

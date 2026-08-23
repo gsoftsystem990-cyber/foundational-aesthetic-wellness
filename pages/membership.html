@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Wellness Advantage Membership | Foundational Aesthetic Wellness</title>
+<meta name="description" content="In-office membership plan with online enrollment. Card details are entered on Stripe Checkout — never on this website.">
+<link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/images/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/main.css">
+<link rel="stylesheet" href="../assets/css/pages.css">
+</head>
+<body data-base="../">
+<main id="page-main" class="site-page">
+
+<section class="page-hero">
+  <div class="page-hero__bg" style="background-image:url('../assets/images/office.jpeg')"></div>
+  <div class="page-hero__overlay"></div>
+  <div class="page-hero__inner">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a><span class="sep">/</span><span>Membership</span>
+    </nav>
+    <h1>Wellness Advantage Plan</h1>
+  </div>
+</section>
+
+<div class="page-body">
+  <p class="treatment-lead">An in-office membership (not insurance) for patients who want simpler pricing and automatic yearly renewal. Enroll online; your card is entered only on Stripe’s checkout page.</p>
+
+  <h2>How the plan works</h2>
+  <div class="membership-steps">
+    <article>
+      <h3>1. Sign up</h3>
+      <p>Tell us who you are so we can match you to an existing chart when possible. No insurance required.</p>
+    </article>
+    <article>
+      <h3>2. Pay on Stripe</h3>
+      <p>You leave this site and enter card details on Stripe Checkout. We never see or store your full card number.</p>
+    </article>
+    <article>
+      <h3>3. Save immediately</h3>
+      <p>Membership is active after payment. Front desk applies member pricing on eligible visits.</p>
+    </article>
+    <article>
+      <h3>4. Auto-renew</h3>
+      <p>Stripe bills the same plan each year until you cancel. Failed cards are retried; we are notified if membership lapses.</p>
+    </article>
+  </div>
+
+  <h2>Enroll</h2>
+  <div class="contact-form-box membership-form-box">
+    <p class="membership-secure-note">Payment security: this form collects identity only (name, date of birth, phone). Card number, CVV, and expiry are collected by Stripe, not by this website.</p>
+    <form id="membershipForm" novalidate autocomplete="on">
+      <div class="membership-hp" aria-hidden="true">
+        <label for="mem-hp">Company website</label>
+        <input type="text" id="mem-hp" name="company_website" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="form-row2">
+        <div class="fg"><label for="mem-fn">First Name *</label><input type="text" id="mem-fn" name="firstName" required maxlength="60" autocomplete="given-name"></div>
+        <div class="fg"><label for="mem-ln">Last Name *</label><input type="text" id="mem-ln" name="lastName" required maxlength="60" autocomplete="family-name"></div>
+      </div>
+      <div class="form-row2">
+        <div class="fg"><label for="mem-em">Email *</label><input type="email" id="mem-em" name="email" required maxlength="120" autocomplete="email"></div>
+        <div class="fg"><label for="mem-ph">Mobile Phone *</label><input type="tel" id="mem-ph" name="phone" required maxlength="20" autocomplete="tel"></div>
+      </div>
+      <div class="form-row2">
+        <div class="fg"><label for="mem-dob">Date of Birth *</label><input type="date" id="mem-dob" name="dob" required autocomplete="bday"></div>
+        <div class="fg">
+          <label for="mem-existing">Are you an existing patient? *</label>
+          <select id="mem-existing" name="existingPatient" required>
+            <option value="">Select…</option>
+            <option value="yes">Yes — match me to my chart</option>
+            <option value="no">No — I am new</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label for="mem-plan">Membership *</label>
+        <select id="mem-plan" name="plan" required>
+          <option value="">Select…</option>
+          <option value="adult">Adult (annual auto-renew)</option>
+          <option value="child">Child (annual auto-renew)</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label for="mem-family">Family members to add (names, ages, adult or child)</label>
+        <textarea id="mem-family" name="family" maxlength="400" placeholder="Optional"></textarea>
+      </div>
+      <div class="fg">
+        <label for="mem-notes">Anything else we should know</label>
+        <textarea id="mem-notes" name="notes" maxlength="500" placeholder="Optional — do not enter card numbers"></textarea>
+      </div>
+      <p class="membership-legal">By continuing you agree this is a practice membership / discount plan, not dental or medical insurance. You will complete payment on Stripe. Membership renews annually until canceled.</p>
+      <button type="submit" class="form-submit-btn" id="membershipSubmit">Continue to secure payment</button>
+      <p class="membership-msg" id="membershipMsg" hidden></p>
+    </form>
+  </div>
+</div>
+
+</main>
+<script src="../assets/js/site-config.js"></script>
+<script src="../assets/js/site-layout.js"></script>
+<script src="../assets/js/main.js"></script>
+<script src="../assets/js/membership.js"></script>
+</body>
+</html>

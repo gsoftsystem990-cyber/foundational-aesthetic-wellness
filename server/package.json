@@ -1,0 +1,21 @@
+{
+  "name": "faw-membership-payments",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Stripe Checkout API for Foundational Aesthetic Wellness memberships. Card data never touches this app.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "stripe": "^17.7.0"
+  }
+}
