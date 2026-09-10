@@ -6,10 +6,12 @@ var rateLimit = require("express-rate-limit");
 var auth = require("../auth");
 var MembershipService = require("../services/MembershipService");
 var ReviewService = require("../services/ReviewService");
+var BookingService = require("../services/BookingService");
 var AuditService = require("../services/AuditService");
 
 var memberships = new MembershipService();
 var reviews = new ReviewService();
+var bookings = new BookingService();
 var router = express.Router();
 
 var loginLimiter = rateLimit({
@@ -86,6 +88,25 @@ router.post("/api/reviews/:id/reject", auth.requireAdmin, auth.requireCsrf, func
   if (!updated) return res.status(404).json({ error: "Review not found." });
   AuditService.write("admin", "review_rejected", null, updated.review_id);
   res.json({ ok: true, review: reviews.toAdminRow(updated) });
+});
+
+router.get("/api/bookings", auth.requireAdmin, function (req, res) {
+  var status = String(req.query.status || "");
+  var rows = bookings.list(status || null).map(function (row) {
+    return bookings.toAdminRow(row);
+  });
+  res.json({
+    csrf: req.adminSession.csrf_token,
+    bookings: rows
+  });
+});
+
+router.post("/api/bookings/:id/status", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var status = String((req.body && req.body.status) || "");
+  var updated = bookings.setStatus(req.params.id, status);
+  if (!updated) return res.status(404).json({ error: "Booking not found or invalid status." });
+  AuditService.write("admin", "booking_status", null, updated.booking_id + ":" + status);
+  res.json({ ok: true, booking: bookings.toAdminRow(updated) });
 });
 
 module.exports = router;

@@ -123,6 +123,19 @@ CREATE TABLE IF NOT EXISTS reviews (
   updated_at TEXT NOT NULL,
   approved_at TEXT
 );
+CREATE TABLE IF NOT EXISTS bookings (
+  booking_id TEXT PRIMARY KEY,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  service TEXT NOT NULL,
+  preferred_time TEXT,
+  message TEXT,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_memberships_status ON memberships(status);
 CREATE INDEX IF NOT EXISTS idx_memberships_patient ON memberships(patient_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_session ON memberships(stripe_checkout_session_id);
@@ -131,6 +144,8 @@ CREATE INDEX IF NOT EXISTS idx_patients_match ON patients(last_name, dob, phone_
 CREATE INDEX IF NOT EXISTS idx_patients_external ON patients(external_patient_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
 CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
+CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+CREATE INDEX IF NOT EXISTS idx_bookings_created ON bookings(created_at);
 `);
   return facade;
 }

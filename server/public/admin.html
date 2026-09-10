@@ -3,109 +3,449 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Staff admin</title>
+<title>Staff Admin | Foundational Wellness</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: sans-serif; margin: 32px; color: #222; background: #f7f8f4; }
-  table { border-collapse: collapse; width: 100%; background: #fff; margin-bottom: 28px; }
-  th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; text-align: left; vertical-align: top; }
-  .bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  button, select { padding: 8px 12px; cursor: pointer; }
-  button.approve { background: #2f6b3a; color: #fff; border: none; }
-  button.reject { background: #8a2a2a; color: #fff; border: none; }
-  #login { max-width: 420px; background: #fff; padding: 24px; }
-  label { display: block; margin: 12px 0 4px; }
-  input { width: 100%; padding: 8px; box-sizing: border-box; }
-  .err { color: #8a2a2a; }
-  .hint { color: #555; font-size: 13px; line-height: 1.5; margin-top: 16px; }
-  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-  .tabs button { background: #fff; border: 1px solid #ccc; }
-  .tabs button.active { background: #2f332c; color: #fff; border-color: #2f332c; }
-  .panel[hidden] { display: none !important; }
-  .muted { color: #666; font-size: 13px; }
-  .review-text { max-width: 360px; white-space: pre-wrap; }
-  code { background: #eee; padding: 1px 4px; }
+  :root {
+    --gold: #a9ad83;
+    --gold2: #b8bc94;
+    --dark: #2f332c;
+    --dark2: #3a3f38;
+    --text: #333;
+    --text2: #5c6358;
+    --white: #fff;
+    --offwhite: #f7f8f4;
+    --offwhite2: #eef0e8;
+    --border: #e0e3d8;
+    --ok: #3d6b45;
+    --ok-bg: #e8f1ea;
+    --warn: #8a6a2a;
+    --warn-bg: #f5f0e3;
+    --danger: #8a2a2a;
+    --danger-bg: #f5e8e8;
+    --info: #3b6ea5;
+    --info-bg: #e8eef8;
+    --font: "Montserrat", sans-serif;
+    --display: "Playfair Display", serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--text);
+    background:
+      radial-gradient(1200px 500px at 10% -10%, #e8ebe1 0%, transparent 55%),
+      radial-gradient(900px 400px at 100% 0%, #ebe8df 0%, transparent 50%),
+      var(--offwhite);
+  }
+  button, select, input { font-family: inherit; }
+  code {
+    font-size: 0.9em;
+    background: var(--offwhite2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* Login */
+  .login-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 36px 32px 32px;
+  }
+  .login-brand {
+    font-family: var(--display);
+    font-size: 28px;
+    color: var(--dark);
+    margin: 0 0 6px;
+  }
+  .login-brand em { font-style: italic; color: var(--gold); }
+  .login-sub {
+    margin: 0 0 28px;
+    color: var(--text2);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .fg { margin-bottom: 16px; }
+  .fg label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--dark2);
+  }
+  .fg input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--offwhite);
+    font-size: 15px;
+    color: var(--dark);
+    outline: none;
+    transition: border-color .15s, background .15s;
+  }
+  .fg input:focus {
+    border-color: var(--gold);
+    background: var(--white);
+  }
+  .btn-primary {
+    width: 100%;
+    margin-top: 8px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--gold);
+    color: #fff;
+    padding: 13px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--gold2); }
+  .err {
+    margin: 14px 0 0;
+    color: var(--danger);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .hint {
+    margin: 18px 0 0;
+    color: var(--text2);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  /* Shell */
+  #dash { display: none; }
+  #dash.is-visible { display: block; }
+  #login[hidden], .panel[hidden] { display: none !important; }
+  .shell {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 28px 20px 48px;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+  .topbar h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(28px, 4vw, 36px);
+    font-weight: 600;
+    color: var(--dark);
+  }
+  .topbar-meta {
+    margin: 4px 0 0;
+    color: var(--text2);
+    font-size: 13px;
+  }
+  .btn-ghost {
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--dark);
+    border-radius: 999px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--dark2); }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    padding: 6px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .tabs button {
+    border: 0;
+    background: transparent;
+    color: var(--text2);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tabs button.active {
+    background: var(--dark);
+    color: #fff;
+  }
+
+  .panel-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+  }
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .toolbar select {
+    border: 1px solid var(--border);
+    background: var(--offwhite);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--dark);
+    min-width: 160px;
+  }
+  .toolbar .btn-ghost { background: var(--offwhite); }
+  .muted {
+    margin: 0 0 16px;
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+  }
+  th, td {
+    padding: 12px 14px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--offwhite);
+    color: var(--dark2);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: #fbfbf8; }
+  .empty {
+    text-align: center;
+    color: var(--text2);
+    padding: 36px 16px !important;
+  }
+  .review-text {
+    max-width: 280px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    color: var(--text2);
+  }
+  .cell-strong { font-weight: 600; color: var(--dark); }
+  .cell-soft { color: var(--text2); }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .pill-new, .pill-pending { background: var(--warn-bg); color: var(--warn); }
+  .pill-contacted, .pill-active, .pill-approved { background: var(--ok-bg); color: var(--ok); }
+  .pill-completed { background: var(--info-bg); color: var(--info); }
+  .pill-cancelled, .pill-canceled, .pill-rejected, .pill-payment_failed, .pill-expired, .pill-past_due {
+    background: var(--danger-bg); color: var(--danger);
+  }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; min-width: 150px; }
+  .btn-sm {
+    border: 0;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .btn-sm.approve { background: var(--ok); color: #fff; }
+  .btn-sm.reject { background: var(--danger); color: #fff; }
+  .btn-sm.approve:hover { filter: brightness(1.05); }
+  .btn-sm.reject:hover { filter: brightness(1.05); }
+
+  @media (max-width: 720px) {
+    .shell { padding: 18px 14px 40px; }
+    .panel-card { padding: 14px; }
+    .login-card { padding: 28px 20px; }
+    .tabs { width: 100%; }
+    .tabs button { flex: 1; text-align: center; }
+  }
 </style>
 </head>
 <body>
-<div id="login">
-  <h1>Staff login</h1>
-  <p class="hint">Open this page only at <code>http://localhost:4242/admin</code> (with the API running).</p>
-  <form id="loginForm" autocomplete="on">
-    <label for="user">Username</label>
-    <input id="user" name="username" autocomplete="username" required>
-    <label for="pass">Password</label>
-    <input id="pass" name="password" type="password" autocomplete="current-password" required>
-    <p><button type="submit">Sign in</button></p>
-    <p class="err" id="loginErr" hidden></p>
-  </form>
-</div>
-<div id="dash" hidden>
-  <div class="bar">
-    <h1 style="margin:0;flex:1">Staff admin</h1>
-    <button type="button" id="logout">Sign out</button>
+<div class="login-wrap" id="login">
+  <div class="login-card">
+    <h1 class="login-brand">Foundational <em>Wellness</em></h1>
+    <p class="login-sub">Staff admin for bookings, comments, and memberships.</p>
+    <form id="loginForm" autocomplete="on">
+      <div class="fg">
+        <label for="user">Username</label>
+        <input id="user" name="username" autocomplete="username" required>
+      </div>
+      <div class="fg">
+        <label for="pass">Password</label>
+        <input id="pass" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn-primary">Sign in</button>
+      <p class="err" id="loginErr" hidden></p>
+    </form>
+    <p class="hint">Open only at <code>http://localhost:4242/admin</code> with the API running.</p>
   </div>
-  <div class="tabs">
-    <button type="button" class="active" data-tab="comments">Comments</button>
-    <button type="button" data-tab="memberships">Memberships</button>
-  </div>
-
-  <section class="panel" id="panel-comments">
-    <div class="bar">
-      <select id="reviewStatus">
-        <option value="pending">Pending</option>
-        <option value="approved">Approved</option>
-        <option value="rejected">Rejected</option>
-        <option value="">All</option>
-      </select>
-      <button type="button" id="refreshReviews">Refresh</button>
-    </div>
-    <p class="muted">Only approved comments appear on the live website. Pending and rejected stay hidden.</p>
-    <table>
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Rating</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Comment</th>
-          <th>Submitted</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="reviewRows"></tbody>
-    </table>
-  </section>
-
-  <section class="panel" id="panel-memberships" hidden>
-    <div class="bar">
-      <select id="status">
-        <option value="">All</option>
-        <option>pending</option>
-        <option>active</option>
-        <option>past_due</option>
-        <option>cancelled</option>
-        <option>expired</option>
-        <option>payment_failed</option>
-      </select>
-      <button type="button" id="refresh">Refresh</button>
-    </div>
-    <p class="muted">Card numbers are never stored. Patient names are for chart matching only.</p>
-    <table>
-      <thead>
-        <tr>
-          <th>Status</th>
-          <th>Plan</th>
-          <th>Patient ref</th>
-          <th>Name</th>
-          <th>Start</th>
-          <th>Renewal</th>
-          <th>Membership ID</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
-  </section>
 </div>
+
+<div id="dash">
+  <div class="shell">
+    <div class="topbar">
+      <div>
+        <h1>Staff admin</h1>
+        <p class="topbar-meta">Manage patient requests and memberships</p>
+      </div>
+      <button type="button" class="btn-ghost" id="logout">Sign out</button>
+    </div>
+
+    <div class="tabs">
+      <button type="button" class="active" data-tab="bookings">Bookings</button>
+      <button type="button" data-tab="comments">Comments</button>
+      <button type="button" data-tab="memberships">Memberships</button>
+    </div>
+
+    <section class="panel panel-card" id="panel-bookings">
+      <div class="toolbar">
+        <select id="bookingStatus">
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="">All</option>
+        </select>
+        <button type="button" class="btn-ghost" id="refreshBookings">Refresh</button>
+      </div>
+      <p class="muted">Booking requests from the website Book Now form appear here.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Service</th>
+              <th>Name</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Preferred</th>
+              <th>Notes</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel panel-card" id="panel-comments" hidden>
+      <div class="toolbar">
+        <select id="reviewStatus">
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+          <option value="">All</option>
+        </select>
+        <button type="button" class="btn-ghost" id="refreshReviews">Refresh</button>
+      </div>
+      <p class="muted">Only approved comments appear on the live website.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Rating</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Comment</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reviewRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel panel-card" id="panel-memberships" hidden>
+      <div class="toolbar">
+        <select id="status">
+          <option value="">All</option>
+          <option>pending</option>
+          <option>active</option>
+          <option>past_due</option>
+          <option>cancelled</option>
+          <option>expired</option>
+          <option>payment_failed</option>
+        </select>
+        <button type="button" class="btn-ghost" id="refresh">Refresh</button>
+      </div>
+      <p class="muted">Card numbers are never stored. Patient names are for chart matching only.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Plan</th>
+              <th>Patient ref</th>
+              <th>Name</th>
+              <th>Start</th>
+              <th>Renewal</th>
+              <th>Membership ID</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
 <script>
 (function () {
   var csrf = "";
@@ -118,11 +458,11 @@
 
   function showDash() {
     document.getElementById("login").hidden = true;
-    document.getElementById("dash").hidden = false;
+    document.getElementById("dash").classList.add("is-visible");
   }
 
   function showLogin() {
-    document.getElementById("dash").hidden = true;
+    document.getElementById("dash").classList.remove("is-visible");
     document.getElementById("login").hidden = false;
   }
 
@@ -130,8 +470,40 @@
     document.querySelectorAll(".tabs button").forEach(function (btn) {
       btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
     });
+    document.getElementById("panel-bookings").hidden = name !== "bookings";
     document.getElementById("panel-comments").hidden = name !== "comments";
     document.getElementById("panel-memberships").hidden = name !== "memberships";
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "—";
+    try {
+      return new Date(iso).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    } catch (e) {
+      return String(iso);
+    }
+  }
+
+  function statusPill(status) {
+    var safe = String(status || "unknown").toLowerCase().replace(/[^a-z0-9_]/g, "_");
+    var span = document.createElement("span");
+    span.className = "pill pill-" + safe;
+    span.textContent = status || "—";
+    return span;
+  }
+
+  function td(content, className) {
+    var cell = document.createElement("td");
+    if (className) cell.className = className;
+    if (content && content.nodeType === 1) cell.appendChild(content);
+    else cell.textContent = content == null ? "" : String(content);
+    return cell;
   }
 
   if (location.protocol === "file:" || (location.port && location.port !== "4242")) {
@@ -150,13 +522,21 @@
     csrf = data.csrf || csrf;
     var body = document.getElementById("rows");
     body.innerHTML = "";
-    (data.memberships || []).forEach(function (row) {
+    var list = data.memberships || [];
+    if (!list.length) {
+      body.innerHTML = '<tr><td class="empty" colspan="7">No memberships in this filter.</td></tr>';
+      showDash();
+      return;
+    }
+    list.forEach(function (row) {
       var tr = document.createElement("tr");
-      [row.status, row.membership_plan_id, row.patient_id, (row.first_name || "") + " " + (row.last_name || ""), row.start_date || "", row.renewal_date || "", row.membership_id].forEach(function (cell) {
-        var td = document.createElement("td");
-        td.textContent = cell;
-        tr.appendChild(td);
-      });
+      tr.appendChild(td(statusPill(row.status)));
+      tr.appendChild(td(row.membership_plan_id, "cell-strong"));
+      tr.appendChild(td(row.patient_id, "cell-soft"));
+      tr.appendChild(td((row.first_name || "") + " " + (row.last_name || ""), "cell-strong"));
+      tr.appendChild(td(formatDate(row.start_date), "cell-soft"));
+      tr.appendChild(td(formatDate(row.renewal_date), "cell-soft"));
+      tr.appendChild(td(row.membership_id, "cell-soft"));
       body.appendChild(tr);
     });
     showDash();
@@ -194,31 +574,24 @@
     body.innerHTML = "";
     var list = data.reviews || [];
     if (!list.length) {
-      var empty = document.createElement("tr");
-      empty.innerHTML = '<td colspan="7">No comments in this filter.</td>';
-      body.appendChild(empty);
+      body.innerHTML = '<tr><td class="empty" colspan="7">No comments in this filter.</td></tr>';
       showDash();
       return;
     }
     list.forEach(function (row) {
       var tr = document.createElement("tr");
-      function cell(text, className) {
-        var td = document.createElement("td");
-        if (className) td.className = className;
-        td.textContent = text;
-        return td;
-      }
-      tr.appendChild(cell(row.status));
-      tr.appendChild(cell(row.rating + " / 5"));
-      tr.appendChild(cell(row.name));
-      tr.appendChild(cell(row.email));
-      tr.appendChild(cell(row.text, "review-text"));
-      tr.appendChild(cell(row.created_at || ""));
+      tr.appendChild(td(statusPill(row.status)));
+      tr.appendChild(td(row.rating + " / 5", "cell-strong"));
+      tr.appendChild(td(row.name, "cell-strong"));
+      tr.appendChild(td(row.email, "cell-soft"));
+      tr.appendChild(td(row.text, "review-text"));
+      tr.appendChild(td(formatDate(row.created_at), "cell-soft"));
       var actions = document.createElement("td");
+      actions.className = "actions";
       if (row.status !== "approved") {
         var approveBtn = document.createElement("button");
         approveBtn.type = "button";
-        approveBtn.className = "approve";
+        approveBtn.className = "btn-sm approve";
         approveBtn.textContent = "Approve";
         approveBtn.addEventListener("click", function () { reviewAction(row.review_id, "approve"); });
         actions.appendChild(approveBtn);
@@ -226,8 +599,7 @@
       if (row.status !== "rejected") {
         var rejectBtn = document.createElement("button");
         rejectBtn.type = "button";
-        rejectBtn.className = "reject";
-        rejectBtn.style.marginLeft = row.status !== "approved" ? "6px" : "0";
+        rejectBtn.className = "btn-sm reject";
         rejectBtn.textContent = "Reject";
         rejectBtn.addEventListener("click", function () { reviewAction(row.review_id, "reject"); });
         actions.appendChild(rejectBtn);
@@ -239,7 +611,80 @@
     showDash();
   }
 
+  async function bookingAction(id, status) {
+    var res = await fetch("/admin/api/bookings/" + encodeURIComponent(id) + "/status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrf,
+        Accept: "application/json"
+      },
+      credentials: "same-origin",
+      body: JSON.stringify({ status: status })
+    });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    if (!res.ok) {
+      var data = await res.json().catch(function () { return {}; });
+      alert(data.error || "Action failed.");
+      return;
+    }
+    loadBookings();
+  }
+
+  async function loadBookings() {
+    var status = document.getElementById("bookingStatus").value;
+    var url = "/admin/api/bookings" + (status ? ("?status=" + encodeURIComponent(status)) : "");
+    var res = await fetch(url, { credentials: "same-origin" });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    var data = await res.json();
+    csrf = data.csrf || csrf;
+    var body = document.getElementById("bookingRows");
+    body.innerHTML = "";
+    var list = data.bookings || [];
+    if (!list.length) {
+      body.innerHTML = '<tr><td class="empty" colspan="9">No bookings in this filter.</td></tr>';
+      showDash();
+      return;
+    }
+    list.forEach(function (row) {
+      var tr = document.createElement("tr");
+      tr.appendChild(td(statusPill(row.status)));
+      tr.appendChild(td(row.service, "cell-strong"));
+      tr.appendChild(td((row.first_name || "") + " " + (row.last_name || ""), "cell-strong"));
+      tr.appendChild(td(row.phone));
+      tr.appendChild(td(row.email, "cell-soft"));
+      tr.appendChild(td(row.preferred_time || "—", "cell-soft"));
+      tr.appendChild(td(row.message || "—", "review-text"));
+      tr.appendChild(td(formatDate(row.created_at), "cell-soft"));
+      var actions = document.createElement("td");
+      actions.className = "actions";
+      function addBtn(label, nextStatus, className) {
+        if (row.status === nextStatus) return;
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-sm " + (className || "");
+        btn.textContent = label;
+        btn.addEventListener("click", function () { bookingAction(row.booking_id, nextStatus); });
+        actions.appendChild(btn);
+      }
+      if (row.status === "new") addBtn("Contacted", "contacted", "approve");
+      if (row.status === "new" || row.status === "contacted") addBtn("Completed", "completed", "approve");
+      if (row.status !== "cancelled" && row.status !== "completed") addBtn("Cancel", "cancelled", "reject");
+      if (!actions.childNodes.length) actions.textContent = "—";
+      tr.appendChild(actions);
+      body.appendChild(tr);
+    });
+    showDash();
+  }
+
   async function loadAll() {
+    await loadBookings();
     await loadReviews();
     await loadMemberships();
   }
@@ -273,7 +718,7 @@
       }
       csrf = data.csrf || "";
       document.getElementById("pass").value = "";
-      setTab("comments");
+      setTab("bookings");
       showDash();
       await loadAll();
     } catch (err) {
@@ -285,6 +730,8 @@
   document.getElementById("status").addEventListener("change", loadMemberships);
   document.getElementById("refreshReviews").addEventListener("click", loadReviews);
   document.getElementById("reviewStatus").addEventListener("change", loadReviews);
+  document.getElementById("refreshBookings").addEventListener("click", loadBookings);
+  document.getElementById("bookingStatus").addEventListener("change", loadBookings);
   document.getElementById("logout").addEventListener("click", async function () {
     await fetch("/admin/logout", {
       method: "POST",

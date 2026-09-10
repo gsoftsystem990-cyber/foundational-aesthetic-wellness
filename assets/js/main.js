@@ -103,6 +103,15 @@ async function sendSiteEmail(payload) {
   return data;
 }
 
+function membershipApiBase() {
+  var config = window.FAW_SITE_CONFIG || {};
+  if (config.membershipApiUrl) return String(config.membershipApiUrl).replace(/\/$/, '');
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return 'http://localhost:4242';
+  }
+  return '';
+}
+
 async function submitForm(e) {
   e.preventDefault();
   var form = document.getElementById('cForm');
@@ -233,17 +242,27 @@ function initBookModal() {
     setMsg('');
 
     try {
-      await sendSiteEmail({
-        _subject: 'New Booking Request — Foundational Aesthetic Wellness',
-        type: 'Booking Request',
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        phone: phone,
-        service: service || 'Not specified',
-        preferred_time: preferred || 'Not specified',
-        message: message || 'No notes provided'
+      var api = membershipApiBase();
+      if (!api) {
+        throw new Error('Booking service is currently unavailable. Please call 610.989.2224.');
+      }
+      var res = await fetch(api + '/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          phone: phone,
+          service: service || 'Not specified',
+          preferred: preferred,
+          message: message
+        })
       });
+      var data = await res.json().catch(function () { return {}; });
+      if (!res.ok) {
+        throw new Error(data.error || 'Could not send your request. Please try again.');
+      }
       form.reset();
       setMsg('');
       if (okMsg) {

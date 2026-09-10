@@ -20,12 +20,14 @@ var AuditService = require("./services/AuditService");
 var createPatientAdapter = require("./adapters/PatientAdapter").createPatientAdapter;
 var adminRoutes = require("./routes/admin");
 var ReviewService = require("./services/ReviewService");
+var BookingService = require("./services/BookingService");
 
 var patientService = new PatientService(createPatientAdapter(db, config));
 var membershipService = new MembershipService();
 var paymentService = new PaymentService();
 var webhookService = new WebhookService(membershipService, paymentService);
 var reviewService = new ReviewService();
+var bookingService = new BookingService();
 
 var app = express();
 app.disable("x-powered-by");
@@ -90,6 +92,14 @@ var reviewLimiter = rateLimit({
   message: { error: "Too many review submissions. Please wait and try again." }
 });
 
+var bookingLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 12,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many booking requests. Please wait and try again." }
+});
+
 app.get("/health", function (req, res) {
   res.json({ ok: true });
 });
@@ -98,7 +108,8 @@ app.get("/public-status", function (req, res) {
   res.json({
     paymentAvailable: paymentService.isReady(),
     mode: paymentService.isReady() ? config.stripe.mode : "unavailable",
-    reviewsAvailable: true
+    reviewsAvailable: true,
+    bookingsAvailable: true
   });
 });
 
@@ -125,6 +136,22 @@ app.post("/api/reviews", reviewLimiter, function (req, res) {
   } catch (err) {
     console.error("review_submit_failed");
     return res.status(500).json({ error: "Could not submit your review. Please try again." });
+  }
+});
+
+app.post("/api/bookings", bookingLimiter, function (req, res) {
+  try {
+    var result = bookingService.validateSubmit(req.body);
+    if (result.error) return res.status(400).json({ error: result.error });
+    var created = bookingService.create(result.data);
+    AuditService.write("patient", "booking_submitted", null, created.booking_id);
+    return res.status(201).json({
+      ok: true,
+      message: "Thank you! Your booking request was received. We will contact you shortly."
+    });
+  } catch (err) {
+    console.error("booking_submit_failed");
+    return res.status(500).json({ error: "Could not submit your booking request. Please try again." });
   }
 });
 
