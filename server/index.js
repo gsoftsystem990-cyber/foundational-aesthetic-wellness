@@ -19,11 +19,13 @@ var NotificationService = require("./services/NotificationService");
 var AuditService = require("./services/AuditService");
 var createPatientAdapter = require("./adapters/PatientAdapter").createPatientAdapter;
 var adminRoutes = require("./routes/admin");
+var ReviewService = require("./services/ReviewService");
 
 var patientService = new PatientService(createPatientAdapter(db, config));
 var membershipService = new MembershipService();
 var paymentService = new PaymentService();
 var webhookService = new WebhookService(membershipService, paymentService);
+var reviewService = new ReviewService();
 
 var app = express();
 app.disable("x-powered-by");
@@ -44,9 +46,28 @@ app.use(cors({
   origin: function (origin, cb) {
     if (!origin) return cb(null, true);
     if (config.allowedOrigins.indexOf(origin) !== -1) return cb(null, true);
+
+    // Same host as this API (admin page at http://localhost:4242/admin)
+    try {
+      var parsed = new URL(origin);
+      var apiHost = "localhost";
+      var apiPort = String(config.port || 4242);
+      if (
+        (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") &&
+        (parsed.port === apiPort || (!parsed.port && apiPort === "80"))
+      ) {
+        return cb(null, true);
+      }
+      // Local website previews (Live Server, etc.) in development
+      if (!config.isProduction && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")) {
+        return cb(null, true);
+      }
+    } catch (e) { /* ignore */ }
+
     return cb(new Error("Origin not allowed"));
   },
-  methods: ["GET", "POST", "OPTIONS"]
+  methods: ["GET", "POST", "OPTIONS"],
+  credentials: true
 }));
 
 app.use("/webhooks/stripe", express.raw({ type: "application/json" }));
@@ -61,6 +82,14 @@ var checkoutLimiter = rateLimit({
   message: { error: "Too many checkout attempts. Please wait and try again." }
 });
 
+var reviewLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many review submissions. Please wait and try again." }
+});
+
 app.get("/health", function (req, res) {
   res.json({ ok: true });
 });
@@ -68,8 +97,35 @@ app.get("/health", function (req, res) {
 app.get("/public-status", function (req, res) {
   res.json({
     paymentAvailable: paymentService.isReady(),
-    mode: paymentService.isReady() ? config.stripe.mode : "unavailable"
+    mode: paymentService.isReady() ? config.stripe.mode : "unavailable",
+    reviewsAvailable: true
   });
+});
+
+app.get("/api/reviews", function (req, res) {
+  try {
+    res.set("Cache-Control", "no-store");
+    res.json({ approved: reviewService.listApprovedPublic() });
+  } catch (err) {
+    console.error("reviews_list_failed");
+    res.status(500).json({ error: "Unable to load reviews." });
+  }
+});
+
+app.post("/api/reviews", reviewLimiter, function (req, res) {
+  try {
+    var result = reviewService.validateSubmit(req.body);
+    if (result.error) return res.status(400).json({ error: result.error });
+    var created = reviewService.createPending(result.data);
+    AuditService.write("patient", "review_submitted", null, created.review_id);
+    return res.status(201).json({
+      ok: true,
+      message: "Thank you! Your review was submitted and is waiting for staff approval."
+    });
+  } catch (err) {
+    console.error("review_submit_failed");
+    return res.status(500).json({ error: "Could not submit your review. Please try again." });
+  }
 });
 
 app.post("/create-checkout-session", checkoutLimiter, async function (req, res) {

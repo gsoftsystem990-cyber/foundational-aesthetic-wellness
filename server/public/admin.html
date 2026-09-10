@@ -3,23 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Membership admin</title>
+<title>Staff admin</title>
 <style>
   body { font-family: sans-serif; margin: 32px; color: #222; background: #f7f8f4; }
-  table { border-collapse: collapse; width: 100%; background: #fff; }
-  th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; text-align: left; }
+  table { border-collapse: collapse; width: 100%; background: #fff; margin-bottom: 28px; }
+  th, td { border: 1px solid #ddd; padding: 8px; font-size: 14px; text-align: left; vertical-align: top; }
   .bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  button, select { padding: 8px 12px; }
-  #login { max-width: 360px; background: #fff; padding: 24px; }
+  button, select { padding: 8px 12px; cursor: pointer; }
+  button.approve { background: #2f6b3a; color: #fff; border: none; }
+  button.reject { background: #8a2a2a; color: #fff; border: none; }
+  #login { max-width: 420px; background: #fff; padding: 24px; }
   label { display: block; margin: 12px 0 4px; }
   input { width: 100%; padding: 8px; box-sizing: border-box; }
   .err { color: #8a2a2a; }
+  .hint { color: #555; font-size: 13px; line-height: 1.5; margin-top: 16px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tabs button { background: #fff; border: 1px solid #ccc; }
+  .tabs button.active { background: #2f332c; color: #fff; border-color: #2f332c; }
+  .panel[hidden] { display: none !important; }
+  .muted { color: #666; font-size: 13px; }
+  .review-text { max-width: 360px; white-space: pre-wrap; }
+  code { background: #eee; padding: 1px 4px; }
 </style>
 </head>
 <body>
 <div id="login">
   <h1>Staff login</h1>
-  <form id="loginForm">
+  <p class="hint">Open this page only at <code>http://localhost:4242/admin</code> (with the API running).</p>
+  <form id="loginForm" autocomplete="on">
     <label for="user">Username</label>
     <input id="user" name="username" autocomplete="username" required>
     <label for="pass">Password</label>
@@ -29,51 +40,110 @@
   </form>
 </div>
 <div id="dash" hidden>
-  <h1>Memberships</h1>
   <div class="bar">
-    <select id="status">
-      <option value="">All</option>
-      <option>pending</option>
-      <option>active</option>
-      <option>past_due</option>
-      <option>cancelled</option>
-      <option>expired</option>
-      <option>payment_failed</option>
-    </select>
-    <button type="button" id="refresh">Refresh</button>
+    <h1 style="margin:0;flex:1">Staff admin</h1>
     <button type="button" id="logout">Sign out</button>
   </div>
-  <p>Card numbers are never stored. Patient names are for chart matching only.</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Status</th>
-        <th>Plan</th>
-        <th>Patient ref</th>
-        <th>Name</th>
-        <th>Start</th>
-        <th>Renewal</th>
-        <th>Membership ID</th>
-      </tr>
-    </thead>
-    <tbody id="rows"></tbody>
-  </table>
+  <div class="tabs">
+    <button type="button" class="active" data-tab="comments">Comments</button>
+    <button type="button" data-tab="memberships">Memberships</button>
+  </div>
+
+  <section class="panel" id="panel-comments">
+    <div class="bar">
+      <select id="reviewStatus">
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+        <option value="">All</option>
+      </select>
+      <button type="button" id="refreshReviews">Refresh</button>
+    </div>
+    <p class="muted">Only approved comments appear on the live website. Pending and rejected stay hidden.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Rating</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Comment</th>
+          <th>Submitted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="reviewRows"></tbody>
+    </table>
+  </section>
+
+  <section class="panel" id="panel-memberships" hidden>
+    <div class="bar">
+      <select id="status">
+        <option value="">All</option>
+        <option>pending</option>
+        <option>active</option>
+        <option>past_due</option>
+        <option>cancelled</option>
+        <option>expired</option>
+        <option>payment_failed</option>
+      </select>
+      <button type="button" id="refresh">Refresh</button>
+    </div>
+    <p class="muted">Card numbers are never stored. Patient names are for chart matching only.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Status</th>
+          <th>Plan</th>
+          <th>Patient ref</th>
+          <th>Name</th>
+          <th>Start</th>
+          <th>Renewal</th>
+          <th>Membership ID</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
 </div>
 <script>
 (function () {
   var csrf = "";
+
   function show(err) {
     var el = document.getElementById("loginErr");
     el.hidden = !err;
     el.textContent = err || "";
   }
-  async function load() {
+
+  function showDash() {
+    document.getElementById("login").hidden = true;
+    document.getElementById("dash").hidden = false;
+  }
+
+  function showLogin() {
+    document.getElementById("dash").hidden = true;
+    document.getElementById("login").hidden = false;
+  }
+
+  function setTab(name) {
+    document.querySelectorAll(".tabs button").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-tab") === name);
+    });
+    document.getElementById("panel-comments").hidden = name !== "comments";
+    document.getElementById("panel-memberships").hidden = name !== "memberships";
+  }
+
+  if (location.protocol === "file:" || (location.port && location.port !== "4242")) {
+    show("Wrong address. Use http://localhost:4242/admin with the API running.");
+  }
+
+  async function loadMemberships() {
     var status = document.getElementById("status").value;
     var url = "/admin/api/memberships" + (status ? ("?status=" + encodeURIComponent(status)) : "");
     var res = await fetch(url, { credentials: "same-origin" });
     if (res.status === 401) {
-      document.getElementById("dash").hidden = true;
-      document.getElementById("login").hidden = false;
+      showLogin();
       return;
     }
     var data = await res.json();
@@ -89,32 +159,132 @@
       });
       body.appendChild(tr);
     });
-    document.getElementById("login").hidden = true;
-    document.getElementById("dash").hidden = false;
+    showDash();
   }
+
+  async function reviewAction(id, action) {
+    var res = await fetch("/admin/api/reviews/" + encodeURIComponent(id) + "/" + action, {
+      method: "POST",
+      headers: { "X-CSRF-Token": csrf, Accept: "application/json" },
+      credentials: "same-origin"
+    });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    if (!res.ok) {
+      var data = await res.json().catch(function () { return {}; });
+      alert(data.error || "Action failed.");
+      return;
+    }
+    loadReviews();
+  }
+
+  async function loadReviews() {
+    var status = document.getElementById("reviewStatus").value;
+    var url = "/admin/api/reviews" + (status ? ("?status=" + encodeURIComponent(status)) : "");
+    var res = await fetch(url, { credentials: "same-origin" });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    var data = await res.json();
+    csrf = data.csrf || csrf;
+    var body = document.getElementById("reviewRows");
+    body.innerHTML = "";
+    var list = data.reviews || [];
+    if (!list.length) {
+      var empty = document.createElement("tr");
+      empty.innerHTML = '<td colspan="7">No comments in this filter.</td>';
+      body.appendChild(empty);
+      showDash();
+      return;
+    }
+    list.forEach(function (row) {
+      var tr = document.createElement("tr");
+      function cell(text, className) {
+        var td = document.createElement("td");
+        if (className) td.className = className;
+        td.textContent = text;
+        return td;
+      }
+      tr.appendChild(cell(row.status));
+      tr.appendChild(cell(row.rating + " / 5"));
+      tr.appendChild(cell(row.name));
+      tr.appendChild(cell(row.email));
+      tr.appendChild(cell(row.text, "review-text"));
+      tr.appendChild(cell(row.created_at || ""));
+      var actions = document.createElement("td");
+      if (row.status !== "approved") {
+        var approveBtn = document.createElement("button");
+        approveBtn.type = "button";
+        approveBtn.className = "approve";
+        approveBtn.textContent = "Approve";
+        approveBtn.addEventListener("click", function () { reviewAction(row.review_id, "approve"); });
+        actions.appendChild(approveBtn);
+      }
+      if (row.status !== "rejected") {
+        var rejectBtn = document.createElement("button");
+        rejectBtn.type = "button";
+        rejectBtn.className = "reject";
+        rejectBtn.style.marginLeft = row.status !== "approved" ? "6px" : "0";
+        rejectBtn.textContent = "Reject";
+        rejectBtn.addEventListener("click", function () { reviewAction(row.review_id, "reject"); });
+        actions.appendChild(rejectBtn);
+      }
+      if (!actions.childNodes.length) actions.textContent = "—";
+      tr.appendChild(actions);
+      body.appendChild(tr);
+    });
+    showDash();
+  }
+
+  async function loadAll() {
+    await loadReviews();
+    await loadMemberships();
+  }
+
+  document.querySelectorAll(".tabs button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      setTab(btn.getAttribute("data-tab"));
+    });
+  });
+
   document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     show("");
-    var res = await fetch("/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify({
-        username: document.getElementById("user").value,
-        password: document.getElementById("pass").value
-      })
-    });
-    var data = await res.json().catch(function () { return {}; });
-    if (!res.ok) {
-      show("Sign-in failed.");
-      return;
+    var username = document.getElementById("user").value.trim();
+    var password = document.getElementById("pass").value;
+    try {
+      var res = await fetch("/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ username: username, password: password })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (res.status === 429) {
+        show(data.error || "Too many sign-in attempts. Wait a few minutes and try again.");
+        return;
+      }
+      if (!res.ok) {
+        show(data.error || "Sign-in failed. Check username/password and use http://localhost:4242/admin");
+        return;
+      }
+      csrf = data.csrf || "";
+      document.getElementById("pass").value = "";
+      setTab("comments");
+      showDash();
+      await loadAll();
+    } catch (err) {
+      show("Cannot reach the API. Start the server with npm start in the server folder, then open http://localhost:4242/admin");
     }
-    csrf = data.csrf || "";
-    document.getElementById("pass").value = "";
-    load();
   });
-  document.getElementById("refresh").addEventListener("click", load);
-  document.getElementById("status").addEventListener("change", load);
+
+  document.getElementById("refresh").addEventListener("click", loadMemberships);
+  document.getElementById("status").addEventListener("change", loadMemberships);
+  document.getElementById("refreshReviews").addEventListener("click", loadReviews);
+  document.getElementById("reviewStatus").addEventListener("change", loadReviews);
   document.getElementById("logout").addEventListener("click", async function () {
     await fetch("/admin/logout", {
       method: "POST",
@@ -123,7 +293,8 @@
     });
     location.reload();
   });
-  load().catch(function () {});
+
+  loadAll().catch(function () {});
 })();
 </script>
 </body>

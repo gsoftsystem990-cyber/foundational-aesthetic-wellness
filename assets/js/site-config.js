@@ -1,9 +1,9 @@
 /**
  * Site configuration
- * All form and review notifications are emailed to notifyEmail via FormSubmit.
+ * Contact forms can still notify notifyEmail via FormSubmit.
  *
- * Reviews stay off the site until you open the email Approve link and click Publish.
- * Live GitHub Pages publishing requires reviewsBinId (run SETUP-REVIEWS-STORAGE.bat once).
+ * Reviews: patients submit to the membership API as pending.
+ * Staff approve/reject in /admin → Comments. Only approved reviews show on the site.
  */
 window.FAW_SITE_CONFIG = {
   notifyEmail: 'malikkhan0225@gmail.com',
@@ -11,8 +11,7 @@ window.FAW_SITE_CONFIG = {
   // Optional: get a free access key at https://web3forms.com
   web3formsAccessKey: '',
 
-  // Required for live review publishing on GitHub Pages
-  // Run SETUP-REVIEWS-STORAGE.bat once, then DEPLOY-GITHUB-PAGES.bat
+  // Legacy JSONBin settings (optional fallback). Prefer membership API reviews.
   reviewsBinId: '',
   reviewsBinKey: '',
 
@@ -21,10 +20,8 @@ window.FAW_SITE_CONFIG = {
 
   // Public origin of the membership API (not a Stripe secret).
   // Local default is http://localhost:4242 when this value is empty.
+  // Required on GitHub Pages so reviews can submit/load from the API.
   membershipApiUrl: '',
-
-  // Used to verify approve links from email
-  reviewApproveSecret: 'faw-approve-2026-mkhan',
 
   googlePlaceId: 'ChIJgxBm5BSVxokRzDPdSMCUzT4',
   googlePlacesApiKey: '',

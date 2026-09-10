@@ -5,9 +5,11 @@ var path = require("path");
 var rateLimit = require("express-rate-limit");
 var auth = require("../auth");
 var MembershipService = require("../services/MembershipService");
+var ReviewService = require("../services/ReviewService");
 var AuditService = require("../services/AuditService");
 
 var memberships = new MembershipService();
+var reviews = new ReviewService();
 var router = express.Router();
 
 var loginLimiter = rateLimit({
@@ -59,6 +61,31 @@ router.get("/api/memberships", auth.requireAdmin, function (req, res) {
     csrf: req.adminSession.csrf_token,
     memberships: rows
   });
+});
+
+router.get("/api/reviews", auth.requireAdmin, function (req, res) {
+  var status = String(req.query.status || "");
+  var rows = reviews.list(status || null).map(function (row) {
+    return reviews.toAdminRow(row);
+  });
+  res.json({
+    csrf: req.adminSession.csrf_token,
+    reviews: rows
+  });
+});
+
+router.post("/api/reviews/:id/approve", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var updated = reviews.setStatus(req.params.id, "approved");
+  if (!updated) return res.status(404).json({ error: "Review not found." });
+  AuditService.write("admin", "review_approved", null, updated.review_id);
+  res.json({ ok: true, review: reviews.toAdminRow(updated) });
+});
+
+router.post("/api/reviews/:id/reject", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var updated = reviews.setStatus(req.params.id, "rejected");
+  if (!updated) return res.status(404).json({ error: "Review not found." });
+  AuditService.write("admin", "review_rejected", null, updated.review_id);
+  res.json({ ok: true, review: reviews.toAdminRow(updated) });
 });
 
 module.exports = router;

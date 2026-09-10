@@ -40,9 +40,9 @@ function destroySession(req) {
 function cookieOptions() {
   return {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "lax",
     secure: config.isProduction,
-    path: "/admin",
+    path: "/",
     maxAge: MAX_AGE_MS
   };
 }

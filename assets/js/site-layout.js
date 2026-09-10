@@ -65,34 +65,56 @@
     '<div class="nav-item"><a href="' + page("membership.html") + '" class="nav-link">Membership</a></div>' +
     '<div class="nav-item"><a href="' + page("contact.html") + '" class="nav-link">Contact</a></div>' +
     "</nav>" +
-    '<button class="hamburger" onclick="openMNav()" aria-label="Menu"><span></span><span></span><span></span></button>' +
+    '<button class="hamburger" onclick="openMNav()" aria-label="Menu" aria-expanded="false" aria-controls="mNav"><span></span><span></span><span></span></button>' +
     "</div></div>" +
-    '<div class="mobile-nav-overlay" id="mNav">' +
-    '<div class="mnav-head"><span class="mnav-logo">Foundational <em>Wellness</em></span>' +
-    '<button class="mnav-close" onclick="closeMNav()" aria-label="Close menu">\u2715</button></div>' +
-    '<div class="mnav-links">' +
-    '<a href="' + home + '" onclick="closeMNav()">Home</a>' +
-    '<div class="mnav-section">Our Providers</div>' +
+    '<div class="mobile-nav" id="mNav" hidden>' +
+    '<button type="button" class="mobile-nav__backdrop" onclick="closeMNav()" aria-label="Close menu"></button>' +
+    '<aside class="mobile-nav__drawer" role="dialog" aria-modal="true" aria-label="Site menu">' +
+    '<div class="mnav-head">' +
+    '<a href="' + home + '" class="mnav-brand" onclick="closeMNav()">' +
+    '<span class="mnav-brand__mark" aria-hidden="true"></span>' +
+    '<span class="mnav-brand__text">Foundational <em>Wellness</em></span></a>' +
+    '<button type="button" class="mnav-close" onclick="closeMNav()" aria-label="Close menu">&times;</button>' +
+    "</div>" +
+    '<div class="mnav-search">' +
+    '<svg class="mnav-search__icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>' +
+    '<input type="search" id="mnavSearch" class="mnav-search__input" placeholder="Search the site..." autocomplete="off" aria-label="Search the site">' +
+    "</div>" +
+    '<div class="mnav-scroll">' +
+    '<p class="mnav-label">Jump to</p>' +
+    '<div class="mnav-list">' +
+    '<a class="mnav-item" href="' + home + '" data-mnav-label="Home" onclick="closeMNav()"><span class="mnav-ico mnav-ico--home" aria-hidden="true"></span><span>Home</span></a>' +
+    '<a class="mnav-item" href="' + section("#services") + '" data-mnav-label="Services" onclick="closeMNav()"><span class="mnav-ico mnav-ico--spark" aria-hidden="true"></span><span>Services</span></a>' +
+    '<a class="mnav-item" href="' + page("membership.html") + '" data-mnav-label="Membership" onclick="closeMNav()"><span class="mnav-ico mnav-ico--card" aria-hidden="true"></span><span>Membership</span></a>' +
+    '<a class="mnav-item" href="' + page("contact.html") + '" data-mnav-label="Contact" onclick="closeMNav()"><span class="mnav-ico mnav-ico--mail" aria-hidden="true"></span><span>Contact</span></a>' +
+    "</div>" +
+    '<p class="mnav-label">More</p>' +
+    '<div class="mnav-list">' +
+    '<div class="mnav-group">' +
+    '<button type="button" class="mnav-item mnav-item--toggle" aria-expanded="false" data-mnav-toggle data-mnav-label="Our Providers"><span class="mnav-ico mnav-ico--people" aria-hidden="true"></span><span>Our Providers</span><span class="mnav-chevron" aria-hidden="true"></span></button>' +
+    '<div class="mnav-sub" hidden>' +
     '<a href="' + page("nelly-silva.html") + '" onclick="closeMNav()">Dr. Nelly Silva</a>' +
     '<a href="' + page("lexi-lojewski.html") + '" onclick="closeMNav()">Lexi Lojewski</a>' +
-    '<div class="mnav-section">About</div>' +
+    "</div></div>" +
+    '<div class="mnav-group">' +
+    '<button type="button" class="mnav-item mnav-item--toggle" aria-expanded="false" data-mnav-toggle data-mnav-label="About"><span class="mnav-ico mnav-ico--info" aria-hidden="true"></span><span>About</span><span class="mnav-chevron" aria-hidden="true"></span></button>' +
+    '<div class="mnav-sub" hidden>' +
     '<a href="' + page("about-us.html") + '" onclick="closeMNav()">About Us</a>' +
     '<a href="' + page("our-practice.html") + '" onclick="closeMNav()">Our Practice</a>' +
-    '<div class="mnav-section">Services</div>' +
-    '<a href="' + page("cosmetic-laser-treatment.html") + '" onclick="closeMNav()">Cosmetic Laser Treatment</a>' +
-    '<a href="' + page("dermaplaning-microneedling.html") + '" onclick="closeMNav()">Dermaplaning &amp; Microneedling</a>' +
-    '<a href="' + page("laser-esthetics.html") + '" onclick="closeMNav()">Laser Esthetics</a>' +
-    '<a href="' + page("skin-rejuvenation-acne-care.html") + '" onclick="closeMNav()">Skin Rejuvenation &amp; Acne Care</a>' +
-    '<a href="' + page("lip-enhancement-liplase.html") + '" onclick="closeMNav()">Lip Enhancement — LipLase</a>' +
-    '<a href="' + page("eye-rejuvenation-smootheye.html") + '" onclick="closeMNav()">Eye Rejuvenation — SmoothEye</a>' +
-    '<a href="' + page("eyelase-eye-lift.html") + '" onclick="closeMNav()">EyeLase™ Eye Lift</a>' +
-    '<a href="' + page("laser-hair-removal.html") + '" onclick="closeMNav()">Laser Hair Removal</a>' +
-    '<div class="mnav-section">Quick Links</div>' +
-    '<a href="' + page("membership.html") + '" onclick="closeMNav()">Membership Plan</a>' +
-    '<a href="' + page("contact.html") + '" onclick="closeMNav()">Contact</a>' +
-    '<a href="tel:+16109892224">\ud83d\udcde 610.989.2224</a>' +
+    "</div></div>" +
+    '<div class="mnav-group">' +
+    '<button type="button" class="mnav-item mnav-item--toggle" aria-expanded="false" data-mnav-toggle data-mnav-label="All Services"><span class="mnav-ico mnav-ico--grid" aria-hidden="true"></span><span>All Services</span><span class="mnav-chevron" aria-hidden="true"></span></button>' +
+    '<div class="mnav-sub" hidden>' +
+    services.map(function (item) {
+      return '<a href="' + page(item.page) + '" onclick="closeMNav()">' + item.name + "</a>";
+    }).join("") +
+    "</div></div>" +
+    '<a class="mnav-item" href="' + page("reviews.html") + '" data-mnav-label="Reviews" onclick="closeMNav()"><span class="mnav-ico mnav-ico--star" aria-hidden="true"></span><span>Reviews</span></a>' +
+    '<a class="mnav-item" href="tel:+16109892224" data-mnav-label="Call 610.989.2224"><span class="mnav-ico mnav-ico--phone" aria-hidden="true"></span><span>610.989.2224</span></a>' +
+    "</div>" +
     '<button type="button" class="mnav-book" data-open-book-modal onclick="closeMNav()">Book an Appointment</button>' +
-    "</div></div>";
+    "</div></aside></div>";
+
 
   var bookModalHtml =
     '<div class="book-modal" id="bookModal" hidden>' +
@@ -165,6 +187,9 @@
   header.id = "site-header";
   header.innerHTML = headerHtml;
   main.parentNode.insertBefore(header, main);
+  if (typeof window.initMobileNavExtras === "function") {
+    window.initMobileNavExtras();
+  }
 
   var footer = document.createElement("div");
   footer.id = "site-footer";

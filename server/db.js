@@ -112,12 +112,25 @@ CREATE TABLE IF NOT EXISTS sessions (
   csrf_token TEXT NOT NULL,
   expires_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS reviews (
+  review_id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  rating INTEGER NOT NULL,
+  text TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  approved_at TEXT
+);
 CREATE INDEX IF NOT EXISTS idx_memberships_status ON memberships(status);
 CREATE INDEX IF NOT EXISTS idx_memberships_patient ON memberships(patient_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_session ON memberships(stripe_checkout_session_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_sub ON memberships(stripe_subscription_id);
 CREATE INDEX IF NOT EXISTS idx_patients_match ON patients(last_name, dob, phone_normalized);
 CREATE INDEX IF NOT EXISTS idx_patients_external ON patients(external_patient_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
+CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
 `);
   return facade;
 }

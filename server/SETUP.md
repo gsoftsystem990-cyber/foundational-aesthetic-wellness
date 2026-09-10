@@ -58,17 +58,14 @@ Memberships activate only after a verified webhook, not because the browser open
 
 Replace `sk_test_` / `pk_test_` / test `price_` / test webhook secret with live values. Set `NODE_ENV=production`, `SESSION_SECRET`, admin credentials, HTTPS, and `ALLOWED_ORIGINS` to the live site only. Restart the API.
 
-## 5. Must change before production
+## Reviews (admin approval)
 
-- Real live Stripe keys on the **client’s** account
-- HTTPS on the API
-- Strong `ADMIN_PASSWORD` and `SESSION_SECRET`
-- Restrict CORS origins
-- Point `membershipApiUrl` at the production API
-- Confirm webhook endpoint is live and signature-verified
-- Patient matching: keep `PATIENT_ADAPTER=local` until the practice PMS API is ready
-- Do not commit `.env` or `server/data/`
+Patient reviews are stored as `pending` in the API database.
 
-## Test cards (test mode only)
+1. Patient submits on `pages/leave-a-review.html`
+2. Staff opens `/admin` → **Comments**
+3. Click **Approve** to publish or **Reject** to hide
+4. Public site loads only approved reviews from `GET /api/reviews`
 
-Use Stripe’s `4242 4242 4242 4242`, any future expiry, any CVC, any ZIP. Failures: `4000 0000 0000 9995`.
+Set `membershipApiUrl` in `assets/js/site-config.js` to this API origin on GitHub Pages.
+No email approve link is required.
