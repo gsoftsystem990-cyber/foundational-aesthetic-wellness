@@ -8,8 +8,6 @@
   });
   document.body.style.overflow = 'hidden';
   if (btn) btn.setAttribute('aria-expanded', 'true');
-  var search = document.getElementById('mnavSearch');
-  if (search) setTimeout(function () { search.focus(); }, 220);
 }
 
 function closeMNav() {
