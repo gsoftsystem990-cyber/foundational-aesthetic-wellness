@@ -20,7 +20,7 @@ ReviewService.prototype.validateSubmit = function (body) {
 
   if (!name || name.length < 2) return { error: "Please enter your name." };
   if (!EMAIL_RE.test(email)) return { error: "Please enter a valid email address." };
-  if (!text || text.length < 5) return { error: "Please write a short review." };
+  if (!text || text.length < 2) return { error: "Please enter your review (at least one word)." };
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return { error: "Please select a rating from 1 to 5." };
   }

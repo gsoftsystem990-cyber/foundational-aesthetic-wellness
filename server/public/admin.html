@@ -115,6 +115,23 @@
     cursor: pointer;
   }
   .btn-primary:hover { background: var(--gold2); }
+  .settings-card {
+    max-width: 460px;
+    margin-top: 8px;
+  }
+  .settings-card h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0 0 8px;
+  }
+  .ok-msg {
+    color: var(--ok);
+    font-size: 14px;
+    margin-top: 12px;
+  }
+  .ok-msg[hidden] { display: none !important; }
   .err {
     margin: 14px 0 0;
     color: var(--danger);
@@ -349,6 +366,7 @@
       <button type="button" class="active" data-tab="bookings">Bookings</button>
       <button type="button" data-tab="comments">Comments</button>
       <button type="button" data-tab="memberships">Memberships</button>
+      <button type="button" data-tab="settings">Settings</button>
     </div>
 
     <section class="panel panel-card" id="panel-bookings">
@@ -356,13 +374,14 @@
         <select id="bookingStatus">
           <option value="new">New</option>
           <option value="contacted">Contacted</option>
+          <option value="confirmed">Confirmed</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
           <option value="">All</option>
         </select>
         <button type="button" class="btn-ghost" id="refreshBookings">Refresh</button>
       </div>
-      <p class="muted">Booking requests from the website Book Now form appear here.</p>
+      <p class="muted">Empty is normal until a patient uses <strong>Book Now</strong> on the website. After they book a time, it appears here. Click <strong>Confirm</strong> to mark the visit confirmed and send / open a WhatsApp confirmation.</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -393,7 +412,7 @@
         </select>
         <button type="button" class="btn-ghost" id="refreshReviews">Refresh</button>
       </div>
-      <p class="muted">Only approved comments appear on the live website.</p>
+      <p class="muted">New reviews show here as <strong>Pending</strong>. Approve them to publish on the website. If the list looks empty, set the filter to Pending (or All) and click Refresh.</p>
       <div class="table-wrap">
         <table>
           <thead>
@@ -443,6 +462,31 @@
         </table>
       </div>
     </section>
+
+    <section class="panel panel-card" id="panel-settings" hidden>
+      <p class="muted">Update the staff admin password used to sign in at <code>/admin</code>.</p>
+      <div class="settings-card">
+        <h2>Change password</h2>
+        <p class="muted" id="settingsUsername">Signed in as —</p>
+        <form id="passwordForm" autocomplete="off">
+          <div class="fg">
+            <label for="currentPassword">Current password</label>
+            <input id="currentPassword" name="currentPassword" type="password" autocomplete="current-password" required>
+          </div>
+          <div class="fg">
+            <label for="newPassword">New password</label>
+            <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" required minlength="8">
+          </div>
+          <div class="fg">
+            <label for="confirmPassword">Confirm new password</label>
+            <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8">
+          </div>
+          <button type="submit" class="btn-primary" id="passwordSaveBtn">Update password</button>
+          <p class="err" id="passwordErr" hidden></p>
+          <p class="ok-msg" id="passwordOk" hidden></p>
+        </form>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -473,6 +517,35 @@
     document.getElementById("panel-bookings").hidden = name !== "bookings";
     document.getElementById("panel-comments").hidden = name !== "comments";
     document.getElementById("panel-memberships").hidden = name !== "memberships";
+    document.getElementById("panel-settings").hidden = name !== "settings";
+    if (name === "settings") loadAccount();
+  }
+
+  function showPasswordMsg(err, ok) {
+    var errEl = document.getElementById("passwordErr");
+    var okEl = document.getElementById("passwordOk");
+    errEl.hidden = !err;
+    errEl.textContent = err || "";
+    okEl.hidden = !ok;
+    okEl.textContent = ok || "";
+  }
+
+  async function loadAccount() {
+    var res = await fetch("/admin/api/account", { credentials: "same-origin" });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    var data = await res.json().catch(function () { return {}; });
+    csrf = data.csrf || csrf;
+    var label = document.getElementById("settingsUsername");
+    if (label) label.textContent = "Signed in as " + (data.username || "admin");
+    var newPass = document.getElementById("newPassword");
+    var confirmPass = document.getElementById("confirmPassword");
+    if (data.minPasswordLength) {
+      if (newPass) newPass.minLength = data.minPasswordLength;
+      if (confirmPass) confirmPass.minLength = data.minPasswordLength;
+    }
   }
 
   function formatDate(iso) {
@@ -626,10 +699,22 @@
       showLogin();
       return;
     }
+    var data = await res.json().catch(function () { return {}; });
     if (!res.ok) {
-      var data = await res.json().catch(function () { return {}; });
       alert(data.error || "Action failed.");
       return;
+    }
+    if (status === "confirmed" && data.whatsapp) {
+      if (data.whatsapp.mode === "api" && data.whatsapp.ok) {
+        alert("Booking confirmed. WhatsApp confirmation was sent to the patient.");
+      } else if (data.whatsapp.deepLink) {
+        var openChat = window.confirm(
+          "Booking confirmed.\n\nWhatsApp auto-send is not configured, so a chat will open with the confirmation message ready. Tap Send in WhatsApp to notify the patient."
+        );
+        if (openChat) window.open(data.whatsapp.deepLink, "_blank", "noopener");
+      } else {
+        alert("Booking confirmed, but WhatsApp could not be prepared: " + (data.whatsapp.error || "missing phone number."));
+      }
     }
     loadBookings();
   }
@@ -659,7 +744,7 @@
       tr.appendChild(td((row.first_name || "") + " " + (row.last_name || ""), "cell-strong"));
       tr.appendChild(td(row.phone));
       tr.appendChild(td(row.email, "cell-soft"));
-      tr.appendChild(td(row.preferred_time || "—", "cell-soft"));
+      tr.appendChild(td(row.preferred_label || row.preferred_time || "—", "cell-soft"));
       tr.appendChild(td(row.message || "—", "review-text"));
       tr.appendChild(td(formatDate(row.created_at), "cell-soft"));
       var actions = document.createElement("td");
@@ -673,8 +758,9 @@
         btn.addEventListener("click", function () { bookingAction(row.booking_id, nextStatus); });
         actions.appendChild(btn);
       }
-      if (row.status === "new") addBtn("Contacted", "contacted", "approve");
-      if (row.status === "new" || row.status === "contacted") addBtn("Completed", "completed", "approve");
+      if (row.status === "new" || row.status === "contacted") addBtn("Confirm", "confirmed", "approve");
+      if (row.status === "new") addBtn("Contacted", "contacted", "");
+      if (row.status === "new" || row.status === "contacted" || row.status === "confirmed") addBtn("Completed", "completed", "approve");
       if (row.status !== "cancelled" && row.status !== "completed") addBtn("Cancel", "cancelled", "reject");
       if (!actions.childNodes.length) actions.textContent = "—";
       tr.appendChild(actions);
@@ -732,6 +818,47 @@
   document.getElementById("reviewStatus").addEventListener("change", loadReviews);
   document.getElementById("refreshBookings").addEventListener("click", loadBookings);
   document.getElementById("bookingStatus").addEventListener("change", loadBookings);
+  document.getElementById("passwordForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    showPasswordMsg("", "");
+    var btn = document.getElementById("passwordSaveBtn");
+    var currentPassword = document.getElementById("currentPassword").value;
+    var newPassword = document.getElementById("newPassword").value;
+    var confirmPassword = document.getElementById("confirmPassword").value;
+    if (btn) btn.disabled = true;
+    try {
+      var res = await fetch("/admin/api/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrf,
+          Accept: "application/json"
+        },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          confirmPassword: confirmPassword
+        })
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (res.status === 401) {
+        showLogin();
+        return;
+      }
+      if (!res.ok) {
+        showPasswordMsg(data.error || "Could not update password.", "");
+        return;
+      }
+      csrf = data.csrf || csrf;
+      document.getElementById("passwordForm").reset();
+      showPasswordMsg("", data.message || "Password updated successfully.");
+    } catch (err) {
+      showPasswordMsg("Could not reach the server. Try again.", "");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
   document.getElementById("logout").addEventListener("click", async function () {
     await fetch("/admin/logout", {
       method: "POST",

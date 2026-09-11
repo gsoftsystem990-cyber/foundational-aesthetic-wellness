@@ -106,7 +106,8 @@ async function sendSiteEmail(payload) {
 function membershipApiBase() {
   var config = window.FAW_SITE_CONFIG || {};
   if (config.membershipApiUrl) return String(config.membershipApiUrl).replace(/\/$/, '');
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+  // Local previews: localhost server or opening HTML via file://
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
     return 'http://localhost:4242';
   }
   return '';
@@ -171,12 +172,25 @@ async function submitForm(e) {
   }
 }
 
+function todayIsoDate() {
+  var today = new Date();
+  return today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+}
+
 function openBookModal() {
   var modal = document.getElementById('bookModal');
   if (!modal) return;
   modal.hidden = false;
   document.body.style.overflow = 'hidden';
-  var first = modal.querySelector('input, select, textarea, button');
+  var dateInput = document.getElementById('book-date');
+  if (dateInput) {
+    var iso = todayIsoDate();
+    dateInput.min = iso;
+    if (!dateInput.value || dateInput.value < iso) dateInput.value = iso;
+  }
+  renderBookingAlternatives([]);
+  if (typeof window.loadBookingSlots === 'function') window.loadBookingSlots();
+  var first = modal.querySelector('input:not([type="hidden"]), select, textarea, button');
   if (first) first.focus();
 }
 
@@ -188,6 +202,163 @@ function closeBookModal() {
     document.body.style.overflow = '';
   }
 }
+
+function phoneDigits(value) {
+  return String(value || '').replace(/\D/g, '');
+}
+
+function renderBookingAlternatives(list) {
+  var box = document.getElementById('bookAlternatives');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!list || !list.length) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  var title = document.createElement('p');
+  title.className = 'book-alternatives__title';
+  title.textContent = 'Available alternative slots:';
+  box.appendChild(title);
+  var row = document.createElement('div');
+  row.className = 'book-alternatives__list';
+  list.forEach(function (item) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'book-alt-slot';
+    btn.textContent = item.label || item.slot;
+    btn.addEventListener('click', function () {
+      var dateInput = document.getElementById('book-date');
+      var slotSelect = document.getElementById('book-slot');
+      if (dateInput && item.date) dateInput.value = item.date;
+      if (typeof window.loadBookingSlots === 'function') {
+        window.loadBookingSlots().then(function () {
+          selectBookingSlot(item.slot);
+        });
+      } else if (slotSelect) {
+        slotSelect.value = item.slot;
+      }
+      box.hidden = true;
+      var msgEl = document.getElementById('bookFormMsg');
+      if (msgEl) {
+        msgEl.textContent = 'Selected: ' + (item.label || item.slot) + '. You can submit again.';
+        msgEl.className = 'book-form-message book-form-message--success';
+      }
+    });
+    row.appendChild(btn);
+  });
+  box.appendChild(row);
+}
+
+function selectBookingSlot(slotValue) {
+  var slotSelect = document.getElementById('book-slot');
+  var grid = document.getElementById('bookSlotGrid');
+  if (slotSelect) slotSelect.value = slotValue || '';
+  if (!grid) return;
+  Array.prototype.forEach.call(grid.querySelectorAll('.book-slot-btn'), function (btn) {
+    var on = btn.getAttribute('data-slot') === slotValue && !btn.disabled;
+    btn.classList.toggle('is-selected', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function renderSlotGrid(slots) {
+  var grid = document.getElementById('bookSlotGrid');
+  var hint = document.getElementById('bookSlotHint');
+  var slotSelect = document.getElementById('book-slot');
+  if (!grid || !slotSelect) return;
+
+  grid.innerHTML = '';
+  grid.hidden = false;
+  slotSelect.innerHTML = '<option value="">Select a time...</option>';
+
+  var availableCount = 0;
+  (slots || []).forEach(function (s) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'book-slot-btn' + (s.available ? '' : ' is-booked');
+    btn.textContent = s.time;
+    btn.setAttribute('data-slot', s.slot);
+    btn.disabled = !s.available;
+    btn.setAttribute('aria-pressed', 'false');
+    if (s.available) {
+      availableCount += 1;
+      var opt = document.createElement('option');
+      opt.value = s.slot;
+      opt.textContent = s.time;
+      slotSelect.appendChild(opt);
+      btn.addEventListener('click', function () {
+        selectBookingSlot(s.slot);
+        var msgEl = document.getElementById('bookFormMsg');
+        if (msgEl) {
+          msgEl.textContent = '';
+          msgEl.className = 'book-form-message';
+        }
+      });
+    } else {
+      btn.title = 'Already booked';
+      btn.setAttribute('aria-label', s.time + ' already booked');
+    }
+    grid.appendChild(btn);
+  });
+
+  if (hint) {
+    if (!slots || !slots.length) {
+      hint.textContent = 'No time slots for this date.';
+    } else if (!availableCount) {
+      hint.textContent = 'All slots are booked for this date. Try another day.';
+    } else {
+      hint.textContent = availableCount + ' open slot' + (availableCount === 1 ? '' : 's') + ' — booked times are grayed out.';
+    }
+  }
+}
+
+window.loadBookingSlots = async function loadBookingSlots() {
+  var dateInput = document.getElementById('book-date');
+  var slotSelect = document.getElementById('book-slot');
+  var hint = document.getElementById('bookSlotHint');
+  var grid = document.getElementById('bookSlotGrid');
+  if (!dateInput || !slotSelect) return;
+  var date = dateInput.value;
+  slotSelect.innerHTML = '<option value="">Loading slots...</option>';
+  if (grid) {
+    grid.innerHTML = '';
+    grid.hidden = true;
+  }
+  if (hint) hint.textContent = 'Loading available times…';
+  if (!date) {
+    slotSelect.innerHTML = '<option value="">Select a date first</option>';
+    if (hint) hint.textContent = 'Choose a date to see time slots.';
+    return;
+  }
+  var api = membershipApiBase();
+  if (!api) {
+    slotSelect.innerHTML = '<option value="">Booking service unavailable</option>';
+    if (hint) hint.textContent = 'Open the site at http://localhost:4242 so time slots can load.';
+    return;
+  }
+  try {
+    var res = await fetch(api + '/api/booking-slots?date=' + encodeURIComponent(date), {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store'
+    });
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) {
+      slotSelect.innerHTML = '<option value="">Unable to load slots</option>';
+      if (hint) hint.textContent = data.error || 'Unable to load time slots.';
+      return;
+    }
+    if (data.closed) {
+      slotSelect.innerHTML = '<option value="">Closed this day</option>';
+      if (hint) hint.textContent = data.message || 'Clinic is closed on this day.';
+      return;
+    }
+    renderSlotGrid(data.slots || []);
+  } catch (e) {
+    slotSelect.innerHTML = '<option value="">Unable to load slots</option>';
+    if (hint) hint.textContent = 'Could not reach booking service. Is http://localhost:4242 running?';
+  }
+};
 
 function initBookModal() {
   document.addEventListener('click', function (e) {
@@ -210,6 +381,15 @@ function initBookModal() {
   if (!form || form.dataset.bound === '1') return;
   form.dataset.bound = '1';
 
+  var dateInput = document.getElementById('book-date');
+  if (dateInput) {
+    dateInput.min = todayIsoDate();
+    dateInput.addEventListener('change', function () {
+      renderBookingAlternatives([]);
+      window.loadBookingSlots();
+    });
+  }
+
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     var msgEl = document.getElementById('bookFormMsg');
@@ -230,8 +410,17 @@ function initBookModal() {
       msgEl.className = 'book-form-message' + (type ? ' book-form-message--' + type : '');
     }
 
-    if (!firstName || !lastName || !isValidEmail(email) || !phone) {
-      setMsg('Please fill in your name, email, and phone number.', 'error');
+    if (!firstName || !lastName || !isValidEmail(email)) {
+      setMsg('Please fill in your name and a valid email address.', 'error');
+      return;
+    }
+    if (!phone || phoneDigits(phone).length < 10) {
+      setMsg('Phone number is required (at least 10 digits) for WhatsApp confirmation.', 'error');
+      form.phone.focus();
+      return;
+    }
+    if (!preferred) {
+      setMsg('Please select an available time slot.', 'error');
       return;
     }
 
@@ -240,11 +429,12 @@ function initBookModal() {
       btn.textContent = 'Sending...';
     }
     setMsg('');
+    renderBookingAlternatives([]);
 
     try {
       var api = membershipApiBase();
       if (!api) {
-        throw new Error('Booking service is currently unavailable. Please call 610.989.2224.');
+        throw new Error('Booking service is currently unavailable. Please call 00.');
       }
       var res = await fetch(api + '/api/bookings', {
         method: 'POST',
@@ -260,10 +450,28 @@ function initBookModal() {
         })
       });
       var data = await res.json().catch(function () { return {}; });
+      if (res.status === 409 || data.code === 'SLOT_TAKEN') {
+        setMsg(data.error || 'This time slot is already booked. Please choose another time.', 'error');
+        renderBookingAlternatives(data.alternatives || []);
+        if (typeof window.loadBookingSlots === 'function') window.loadBookingSlots();
+        return;
+      }
       if (!res.ok) {
         throw new Error(data.error || 'Could not send your request. Please try again.');
       }
       form.reset();
+      if (dateInput) {
+        dateInput.min = todayIsoDate();
+        dateInput.value = todayIsoDate();
+      }
+      selectBookingSlot('');
+      var grid = document.getElementById('bookSlotGrid');
+      if (grid) {
+        grid.innerHTML = '';
+        grid.hidden = true;
+      }
+      var slotSelect = document.getElementById('book-slot');
+      if (slotSelect) slotSelect.innerHTML = '<option value="">Select a date first</option>';
       setMsg('');
       if (okMsg) {
         okMsg.style.display = 'block';

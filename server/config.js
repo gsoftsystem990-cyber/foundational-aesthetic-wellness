@@ -46,6 +46,12 @@ var config = {
   patientAdapter: env("PATIENT_ADAPTER", "local"),
   patientApiUrl: env("PATIENT_API_URL", "").replace(/\/$/, ""),
   patientApiKey: env("PATIENT_API_KEY", ""),
+  whatsapp: {
+    token: env("WHATSAPP_TOKEN", ""),
+    phoneNumberId: env("WHATSAPP_PHONE_NUMBER_ID", ""),
+    apiVersion: env("WHATSAPP_API_VERSION", "v21.0"),
+    defaultCountry: env("WHATSAPP_DEFAULT_COUNTRY", "1")
+  },
   stripe: {
     secretKey: stripeSecret,
     publishableKey: env("STRIPE_PUBLISHABLE_KEY", ""),

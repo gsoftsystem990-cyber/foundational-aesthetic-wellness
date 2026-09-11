@@ -36,9 +36,9 @@
 
   var headerHtml =
     '<div id="topbar"><div class="topbar-inner">' +
-    '<a class="tb-item" href="tel:+16109892224">' +
+    '<a class="tb-item" href="tel:00">' +
     '<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>' +
-    "610.989.2224</a>" +
+    "00</a>" +
     '<button type="button" class="tb-item tb-book" data-open-book-modal>Book Now</button>' +
     "</div></div>" +
     '<div id="header"><div class="header-inner">' +
@@ -110,7 +110,7 @@
     }).join("") +
     "</div></div>" +
     '<a class="mnav-item" href="' + page("reviews.html") + '" data-mnav-label="Reviews" onclick="closeMNav()"><span class="mnav-ico mnav-ico--star" aria-hidden="true"></span><span>Reviews</span></a>' +
-    '<a class="mnav-item" href="tel:+16109892224" data-mnav-label="Call 610.989.2224"><span class="mnav-ico mnav-ico--phone" aria-hidden="true"></span><span>610.989.2224</span></a>' +
+    '<a class="mnav-item" href="tel:00" data-mnav-label="Call 00"><span class="mnav-ico mnav-ico--phone" aria-hidden="true"></span><span>00</span></a>' +
     "</div>" +
     '<button type="button" class="mnav-book" data-open-book-modal onclick="closeMNav()">Book an Appointment</button>' +
     "</div></aside></div>";
@@ -122,7 +122,7 @@
     '<div class="book-modal__panel" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">' +
     '<button type="button" class="book-modal__close" data-close-book-modal aria-label="Close">&times;</button>' +
     '<h3 id="bookModalTitle">Book an Appointment</h3>' +
-    '<p class="book-modal__sub">Share your details and we will contact you to confirm your visit.</p>' +
+    '<p class="book-modal__sub">Choose an open time slot. Phone number is required so we can confirm your visit on WhatsApp.</p>' +
     '<div class="form-success-msg" id="bookFormOk">Thank you! Your booking request has been sent. We will be in touch shortly.</div>' +
     '<form id="bookForm" novalidate>' +
     '<div class="form-row2">' +
@@ -130,7 +130,7 @@
     '<div class="fg"><label for="book-ln">Last Name *</label><input type="text" id="book-ln" name="lastName" required placeholder="Smith"></div>' +
     '</div>' +
     '<div class="fg"><label for="book-em">Email Address *</label><input type="email" id="book-em" name="email" required placeholder="jane@example.com"></div>' +
-    '<div class="fg"><label for="book-ph">Phone Number *</label><input type="tel" id="book-ph" name="phone" required placeholder="(610) 555-0000"></div>' +
+    '<div class="fg"><label for="book-ph">Phone Number (WhatsApp) *</label><input type="tel" id="book-ph" name="phone" required inputmode="tel" autocomplete="tel" placeholder="(610) 555-0000"></div>' +
     '<div class="fg"><label for="book-svc">Service of Interest</label><select id="book-svc" name="service">' +
     '<option value="">Select a service...</option>' +
     '<option>Cosmetic Laser Treatment</option>' +
@@ -143,7 +143,13 @@
     '<option>Laser Hair Removal</option>' +
     '<option>Other / Consultation</option>' +
     '</select></div>' +
-    '<div class="fg"><label for="book-pref">Preferred Date / Time</label><input type="text" id="book-pref" name="preferred" placeholder="e.g. Weekday mornings"></div>' +
+    '<div class="fg"><label for="book-date">Appointment Date *</label><input type="date" id="book-date" name="date" required></div>' +
+    '<div class="fg book-slot-field"><label for="book-slot">Time Slot *</label>' +
+    '<select id="book-slot" name="preferred" required class="book-slot-select"><option value="">Select a date first</option></select>' +
+    '<div id="bookSlotGrid" class="book-slot-grid" hidden></div>' +
+    '</div>' +
+    '<div id="bookSlotHint" class="book-slot-hint" aria-live="polite"></div>' +
+    '<div id="bookAlternatives" class="book-alternatives" hidden></div>' +
     '<div class="fg"><label for="book-msg">Notes</label><textarea id="book-msg" name="message" placeholder="Tell us about your goals or questions..."></textarea></div>' +
     '<button type="submit" class="form-submit-btn" id="bookSubmitBtn">Send Booking Request</button>' +
     '<p class="book-form-message" id="bookFormMsg" aria-live="polite"></p>' +
@@ -176,7 +182,7 @@
     '<div class="footer-col"><h4>Patients</h4><ul>' +
     '<li><a href="' + page("membership.html") + '">Membership Plan</a></li>' +
     '<li><a href="' + page("contact.html") + '">Collegeville, PA</a></li>' +
-    '<li><a href="tel:+16109892224">610.989.2224</a></li>' +
+    '<li><a href="tel:00">00</a></li>' +
     "</ul></div></div>" +
     "</footer>";
 

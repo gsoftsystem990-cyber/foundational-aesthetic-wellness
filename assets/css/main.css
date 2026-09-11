@@ -1106,6 +1106,84 @@ footer{
 .book-form-message--error{color:#b42318}
 .book-form-message--success{color:#2d6a4f}
 .book-modal .form-success-msg{display:none;margin-bottom:16px}
+.book-slot-hint{
+  font-family:var(--font-body);
+  font-size:13px;
+  color:var(--text2);
+  margin:-6px 0 14px;
+}
+.book-slot-select{
+  position:absolute;
+  width:1px;height:1px;
+  opacity:0;overflow:hidden;
+  clip:rect(0,0,0,0);
+}
+.book-slot-field{position:relative}
+.book-slot-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin-top:8px;
+}
+.book-slot-btn{
+  font-family:var(--font-body);
+  font-size:13px;
+  font-weight:600;
+  padding:10px 6px;
+  border:1px solid rgba(176,141,87,0.45);
+  background:#fff;
+  color:var(--dark);
+  cursor:pointer;
+}
+.book-slot-btn:hover:not(:disabled){
+  background:rgba(176,141,87,0.12);
+}
+.book-slot-btn.is-selected{
+  background:var(--gold);
+  border-color:var(--gold);
+  color:#fff;
+}
+.book-slot-btn.is-booked,
+.book-slot-btn:disabled{
+  background:#f0f0f0;
+  border-color:#ddd;
+  color:#9a9a9a;
+  cursor:not-allowed;
+  text-decoration:line-through;
+}
+.book-alternatives{
+  margin:0 0 16px;
+  padding:12px 14px;
+  background:#f7f5f0;
+  border:1px solid rgba(0,0,0,0.06);
+}
+.book-alternatives__title{
+  font-family:var(--font-body);
+  font-size:13px;
+  font-weight:600;
+  color:var(--dark);
+  margin:0 0 10px;
+}
+.book-alternatives__list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.book-alt-slot{
+  font-family:var(--font-body);
+  font-size:13px;
+  border:1px solid rgba(176,141,87,0.45);
+  background:#fff;
+  color:var(--dark);
+  padding:8px 12px;
+  cursor:pointer;
+}
+.book-alt-slot:hover{
+  background:rgba(176,141,87,0.12);
+}
+@media(max-width:860px){
+  .book-slot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 
 /* RESPONSIVE */
 @media(max-width:1100px){

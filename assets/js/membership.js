@@ -5,7 +5,8 @@
   function apiBase() {
     var config = window.FAW_SITE_CONFIG || {};
     if (config.membershipApiUrl) return String(config.membershipApiUrl).replace(/\/$/, "");
-    if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    // Local previews: localhost server or opening HTML via file://
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.protocol === "file:") {
       return "http://localhost:4242";
     }
     return "";

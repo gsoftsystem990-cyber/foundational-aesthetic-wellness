@@ -55,41 +55,46 @@ $ghLoggedIn = $false
 $owner = $null
 
 if ($gh) {
+  # gh auth status writes to stderr when logged out; do not treat that as a fatal script error.
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
   & $gh auth status 2>&1 | Out-Null
-  if ($LASTEXITCODE -eq 0) {
+  $authExit = $LASTEXITCODE
+  $ErrorActionPreference = $prevEap
+
+  if ($authExit -eq 0) {
     $ghLoggedIn = $true
-    $owner = (& $gh api user -q .login).Trim()
+    $ErrorActionPreference = "Continue"
+    $owner = (& $gh api user -q .login 2>$null)
+    $ErrorActionPreference = $prevEap
+    if ($owner) { $owner = $owner.Trim() }
   }
 }
 
-if (-not $ghLoggedIn) {
+if (-not $owner) {
   $remoteUrl = ""
   if (Test-Path ".git") {
+    $ErrorActionPreference = "Continue"
     $remoteUrl = (& $git remote get-url origin 2>$null)
+    $ErrorActionPreference = "Stop"
   }
 
   if ($remoteUrl -match "github\.com[:/]([^/]+)/([^/.]+)") {
     $owner = $Matches[1]
-  } else {
-    Write-Host "GitHub CLI (gh) is not installed, so this script cannot create a new repo automatically." -ForegroundColor Yellow
-    Write-Host ""
-    if (-not $gh) {
-      Write-Host "Install GitHub CLI (optional, one time):" -ForegroundColor Cyan
-      Write-Host "  winget install --id GitHub.cli"
-      Write-Host "  gh auth login"
-      Write-Host ""
-    } else {
-      Write-Host "You are not logged into GitHub CLI yet. Run:" -ForegroundColor Cyan
-      Write-Host "  gh auth login"
+    if (-not $ghLoggedIn) {
+      Write-Host "GitHub CLI is not logged in - deploying with git push (origin already set)." -ForegroundColor Yellow
+      Write-Host "Optional later: gh auth login" -ForegroundColor Gray
       Write-Host ""
     }
-    Write-Host "Or create the GitHub repo in the browser, then in this folder run:" -ForegroundColor Cyan
-    Write-Host "  git remote add origin https://github.com/YOUR_USER/$repoName.git"
-    Write-Host "  git add -A"
-    Write-Host "  git commit -m `"Deploy site to GitHub Pages`""
-    Write-Host "  git push -u origin main"
+  } else {
+    Write-Host "No GitHub remote found, and GitHub CLI is not logged in." -ForegroundColor Red
     Write-Host ""
-    Write-Host "Then enable Pages: GitHub repo → Settings → Pages → Source = GitHub Actions" -ForegroundColor Yellow
+    Write-Host "Fix option A (recommended if repo already exists):" -ForegroundColor Cyan
+    Write-Host "  git remote add origin https://github.com/YOUR_USER/$repoName.git"
+    Write-Host ""
+    Write-Host "Fix option B (login GitHub CLI once):" -ForegroundColor Cyan
+    Write-Host "  gh auth login"
+    Write-Host ""
     exit 1
   }
 }
@@ -99,10 +104,11 @@ Write-Host "GitHub account: $owner" -ForegroundColor Gray
 Write-Host "Live site URL:  $pagesUrl" -ForegroundColor Cyan
 Write-Host ""
 
-# Set public URL in site-config.js for approval email links
+# Set public URL in site-config.js
 $configPath = Join-Path $PSScriptRoot "assets\js\site-config.js"
 $config = Get-Content $configPath -Raw
-$config = $config -replace "publicSiteUrl:\s*'[^']*'", "publicSiteUrl: '$pagesUrl'"
+$replacement = "publicSiteUrl: '" + $pagesUrl + "'"
+$config = [regex]::Replace($config, 'publicSiteUrl:\s*''[^'']*''', $replacement)
 Set-Content -Path $configPath -Value $config -NoNewline
 
 if (-not (Test-Path ".git")) {
@@ -110,7 +116,10 @@ if (-not (Test-Path ".git")) {
   & $git branch -M main
 }
 
+$ErrorActionPreference = "Continue"
 $hasRemote = & $git remote 2>$null
+$ErrorActionPreference = "Stop"
+
 if (-not $hasRemote) {
   if (-not $ghLoggedIn) {
     Write-Host "No git remote is set, and GitHub CLI is not available to create one." -ForegroundColor Red
@@ -124,46 +133,44 @@ if (-not $hasRemote) {
   if ($status) {
     & $git -c user.name="$owner" -c user.email="$owner@users.noreply.github.com" commit -m "Deploy site to GitHub Pages"
   }
+  Write-Host "Pushing to origin/main..." -ForegroundColor Cyan
   & $git push -u origin main
+  if ($LASTEXITCODE -ne 0) {
+    Write-Host "git push failed. Check your GitHub credentials / remote access." -ForegroundColor Red
+    exit 1
+  }
 }
 
 if ($ghLoggedIn) {
   Write-Host "Enabling GitHub Pages..." -ForegroundColor Cyan
   $pagesApi = "/repos/$owner/$repoName/pages"
-  $pagesExists = $true
+  $ErrorActionPreference = "Continue"
   & $gh api $pagesApi 2>$null | Out-Null
-  if ($LASTEXITCODE -ne 0) { $pagesExists = $false }
+  $pagesExists = ($LASTEXITCODE -eq 0)
 
   if ($pagesExists) {
     & $gh api --method PUT $pagesApi -f build_type=workflow 2>$null | Out-Null
   } else {
     & $gh api --method POST $pagesApi -f build_type=workflow 2>$null | Out-Null
   }
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "Could not enable GitHub Pages via API." -ForegroundColor Red
-    Write-Host "Enable manually: https://github.com/$owner/$repoName/settings/pages" -ForegroundColor Yellow
-    Write-Host "Choose: Source = GitHub Actions" -ForegroundColor Yellow
-    exit 1
-  }
+  $pagesOk = ($LASTEXITCODE -eq 0)
+  $ErrorActionPreference = "Stop"
 
-  Write-Host "Starting deployment workflow..." -ForegroundColor Cyan
-  & $gh workflow run "Deploy to GitHub Pages" --repo "$owner/$repoName"
-  if ($LASTEXITCODE -ne 0) {
-    Write-Host "Workflow will run automatically on push; check Actions if needed." -ForegroundColor Yellow
+  if (-not $pagesOk) {
+    Write-Host "Could not enable GitHub Pages via API." -ForegroundColor Yellow
+    Write-Host "Enable manually if needed: https://github.com/$owner/$repoName/settings/pages" -ForegroundColor Yellow
+    Write-Host "Choose: Source = GitHub Actions" -ForegroundColor Yellow
+  } else {
+    Write-Host "Starting deployment workflow..." -ForegroundColor Cyan
+    $ErrorActionPreference = "Continue"
+    & $gh workflow run "Deploy to GitHub Pages" --repo "$owner/$repoName" 2>$null
+    $ErrorActionPreference = "Stop"
   }
 } else {
-  Write-Host "GitHub CLI is not installed, so Pages must be enabled once in the browser:" -ForegroundColor Yellow
+  Write-Host "Pages should update automatically from the push (GitHub Actions)." -ForegroundColor Gray
+  Write-Host "If the live site 404s, open:" -ForegroundColor Yellow
   Write-Host "  https://github.com/$owner/$repoName/settings/pages" -ForegroundColor Cyan
   Write-Host "  Source = GitHub Actions" -ForegroundColor Cyan
-}
-
-$configCheck = Get-Content (Join-Path $PSScriptRoot "assets\js\site-config.js") -Raw
-if ($configCheck -notmatch "reviewsBinId:\s*'[^']+'") {
-  Write-Host ""
-  Write-Host "IMPORTANT: Review cloud storage is not configured yet." -ForegroundColor Yellow
-  Write-Host "Approved reviews will NOT appear on the live site until you run:" -ForegroundColor Yellow
-  Write-Host "  SETUP-REVIEWS-STORAGE.bat" -ForegroundColor Cyan
-  Write-Host "Then run this deploy script again." -ForegroundColor Yellow
 }
 
 Write-Host ""
@@ -173,9 +180,5 @@ Write-Host "Your permanent website link:" -ForegroundColor Yellow
 Write-Host "  $pagesUrl" -ForegroundColor Green
 Write-Host ""
 Write-Host "Wait 1-3 minutes, then open the link above." -ForegroundColor Gray
-Write-Host "If you see 404, check:" -ForegroundColor Gray
-Write-Host "  https://github.com/$owner/$repoName/actions"
-Write-Host "  https://github.com/$owner/$repoName/settings/pages"
-Write-Host ""
-Write-Host "You do NOT need local tunnel / START-PREVIEW.bat for clients anymore." -ForegroundColor Yellow
+Write-Host "Actions: https://github.com/$owner/$repoName/actions"
 Write-Host ""

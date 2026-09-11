@@ -136,6 +136,13 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS admin_settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  username TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  password_salt TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 CREATE INDEX IF NOT EXISTS idx_memberships_status ON memberships(status);
 CREATE INDEX IF NOT EXISTS idx_memberships_patient ON memberships(patient_id);
 CREATE INDEX IF NOT EXISTS idx_memberships_session ON memberships(stripe_checkout_session_id);

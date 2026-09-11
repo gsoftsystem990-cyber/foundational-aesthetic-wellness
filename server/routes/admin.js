@@ -8,6 +8,7 @@ var MembershipService = require("../services/MembershipService");
 var ReviewService = require("../services/ReviewService");
 var BookingService = require("../services/BookingService");
 var AuditService = require("../services/AuditService");
+var NotificationService = require("../services/NotificationService");
 
 var memberships = new MembershipService();
 var reviews = new ReviewService();
@@ -101,12 +102,51 @@ router.get("/api/bookings", auth.requireAdmin, function (req, res) {
   });
 });
 
-router.post("/api/bookings/:id/status", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+router.post("/api/bookings/:id/status", auth.requireAdmin, auth.requireCsrf, async function (req, res) {
   var status = String((req.body && req.body.status) || "");
   var updated = bookings.setStatus(req.params.id, status);
   if (!updated) return res.status(404).json({ error: "Booking not found or invalid status." });
   AuditService.write("admin", "booking_status", null, updated.booking_id + ":" + status);
-  res.json({ ok: true, booking: bookings.toAdminRow(updated) });
+
+  var payload = {
+    ok: true,
+    booking: bookings.toAdminRow(updated)
+  };
+
+  if (status === "confirmed") {
+    var message = bookings.buildConfirmationMessage(updated);
+    var whatsapp = await NotificationService.bookingConfirmed(updated, message);
+    payload.whatsapp = {
+      ok: Boolean(whatsapp && whatsapp.ok),
+      mode: (whatsapp && whatsapp.mode) || "none",
+      deepLink: (whatsapp && whatsapp.deepLink) || "",
+      error: (whatsapp && whatsapp.error) || "",
+      message: message
+    };
+  }
+
+  res.json(payload);
+});
+
+router.get("/api/account", auth.requireAdmin, function (req, res) {
+  res.json({
+    csrf: req.adminSession.csrf_token,
+    username: auth.getAdminUsername(),
+    minPasswordLength: auth.MIN_PASSWORD_LEN
+  });
+});
+
+router.post("/api/change-password", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var body = req.body || {};
+  var result = auth.changePassword(body.currentPassword, body.newPassword, body.confirmPassword);
+  if (result.error) return res.status(400).json({ error: result.error });
+  AuditService.write("admin", "admin_password_changed", null, "ok");
+  res.json({
+    ok: true,
+    message: result.message,
+    envUpdated: Boolean(result.envUpdated),
+    csrf: req.adminSession.csrf_token
+  });
 });
 
 module.exports = router;

@@ -10,7 +10,11 @@
     var configured = String(config.membershipApiUrl || '').replace(/\/+$/, '');
     if (configured) return configured;
     var host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:4242';
+    var protocol = window.location.protocol;
+    // Local previews: localhost server or opening HTML via file://
+    if (host === 'localhost' || host === '127.0.0.1' || protocol === 'file:') {
+      return 'http://localhost:4242';
+    }
     return '';
   }
 

@@ -3,6 +3,7 @@
 require("dotenv").config();
 
 var express = require("express");
+var path = require("path");
 var cors = require("cors");
 var helmet = require("helmet");
 var rateLimit = require("express-rate-limit");
@@ -38,7 +39,11 @@ app.use(helmet({
     useDefaults: true,
     directives: {
       "script-src": ["'self'", "'unsafe-inline'"],
-      "form-action": ["'self'"]
+      "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
+      "img-src": ["'self'", "data:", "https:", "blob:"],
+      "connect-src": ["'self'", "https:"],
+      "form-action": ["'self'", "https:"]
     }
   },
   crossOriginResourcePolicy: { policy: "cross-origin" }
@@ -47,6 +52,8 @@ app.use(helmet({
 app.use(cors({
   origin: function (origin, cb) {
     if (!origin) return cb(null, true);
+    // Browsers send Origin: null for file:// pages
+    if (origin === "null" && !config.isProduction) return cb(null, true);
     if (config.allowedOrigins.indexOf(origin) !== -1) return cb(null, true);
 
     // Same host as this API (admin page at http://localhost:4242/admin)
@@ -78,7 +85,7 @@ app.use(cookieParser());
 
 var checkoutLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 8,
+  max: config.isProduction ? 8 : 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many checkout attempts. Please wait and try again." }
@@ -86,7 +93,7 @@ var checkoutLimiter = rateLimit({
 
 var reviewLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: config.isProduction ? 10 : 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many review submissions. Please wait and try again." }
@@ -94,7 +101,7 @@ var reviewLimiter = rateLimit({
 
 var bookingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 12,
+  max: config.isProduction ? 12 : 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many booking requests. Please wait and try again." }
@@ -139,17 +146,47 @@ app.post("/api/reviews", reviewLimiter, function (req, res) {
   }
 });
 
+app.get("/api/booking-slots", function (req, res) {
+  try {
+    res.set("Cache-Control", "no-store");
+    var date = String(req.query.date || "").trim();
+    var result = bookingService.getSlotsForDate(date);
+    if (result.error) return res.status(400).json({ error: result.error });
+    return res.json(result);
+  } catch (err) {
+    console.error("booking_slots_failed");
+    return res.status(500).json({ error: "Unable to load time slots." });
+  }
+});
+
 app.post("/api/bookings", bookingLimiter, function (req, res) {
   try {
     var result = bookingService.validateSubmit(req.body);
+    if (result.code === "SLOT_TAKEN") {
+      return res.status(409).json({
+        error: result.error,
+        code: "SLOT_TAKEN",
+        alternatives: result.alternatives || []
+      });
+    }
     if (result.error) return res.status(400).json({ error: result.error });
     var created = bookingService.create(result.data);
     AuditService.write("patient", "booking_submitted", null, created.booking_id);
     return res.status(201).json({
       ok: true,
-      message: "Thank you! Your booking request was received. We will contact you shortly."
+      message: "Thank you! Your booking request was received. We will contact you shortly.",
+      bookingId: created.booking_id,
+      slot: created.preferred_time,
+      slotLabel: bookingService.formatSlotLabel(created.preferred_time)
     });
   } catch (err) {
+    if (err && err.code === "SLOT_TAKEN") {
+      return res.status(409).json({
+        error: "This time slot is already booked.",
+        code: "SLOT_TAKEN",
+        alternatives: err.alternatives || bookingService.findAlternatives((req.body && (req.body.preferred || req.body.slot)) || "", 6)
+      });
+    }
     console.error("booking_submit_failed");
     return res.status(500).json({ error: "Could not submit your booking request. Please try again." });
   }
@@ -216,6 +253,19 @@ app.post("/internal/jobs/renewal-reminders", auth.requireCron, async function (r
 
 app.use("/admin", adminRoutes);
 
+// Serve the marketing website from the project root (same port as the API).
+var siteRoot = path.join(__dirname, "..");
+app.use(express.static(siteRoot, {
+  index: "index.html",
+  extensions: ["html"],
+  dotfiles: "ignore",
+  setHeaders: function (res, filePath) {
+    if (/\.(html)$/i.test(filePath)) {
+      res.setHeader("Cache-Control", "no-cache");
+    }
+  }
+}));
+
 app.use(function (err, req, res, next) {
   if (err && err.message === "Origin not allowed") {
     return res.status(403).json({ error: "Forbidden" });
@@ -224,6 +274,7 @@ app.use(function (err, req, res, next) {
 });
 
 db.initDb().then(function () {
+  auth.ensureAdminSeeded();
   app.listen(config.port, function () {
     console.log("Membership API listening on port " + config.port);
   });
