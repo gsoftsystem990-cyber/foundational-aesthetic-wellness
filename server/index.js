@@ -22,6 +22,7 @@ var createPatientAdapter = require("./adapters/PatientAdapter").createPatientAda
 var adminRoutes = require("./routes/admin");
 var ReviewService = require("./services/ReviewService");
 var BookingService = require("./services/BookingService");
+var ContactMessageService = require("./services/ContactMessageService");
 
 var patientService = new PatientService(createPatientAdapter(db, config));
 var membershipService = new MembershipService();
@@ -29,6 +30,7 @@ var paymentService = new PaymentService();
 var webhookService = new WebhookService(membershipService, paymentService);
 var reviewService = new ReviewService();
 var bookingService = new BookingService();
+var contactMessageService = new ContactMessageService();
 
 var app = express();
 app.disable("x-powered-by");
@@ -107,6 +109,14 @@ var bookingLimiter = rateLimit({
   message: { error: "Too many booking requests. Please wait and try again." }
 });
 
+var contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: config.isProduction ? 12 : 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many messages. Please wait and try again." }
+});
+
 app.get("/health", function (req, res) {
   res.json({ ok: true });
 });
@@ -116,7 +126,8 @@ app.get("/public-status", function (req, res) {
     paymentAvailable: paymentService.isReady(),
     mode: paymentService.isReady() ? config.stripe.mode : "unavailable",
     reviewsAvailable: true,
-    bookingsAvailable: true
+    bookingsAvailable: true,
+    contactMessagesAvailable: true
   });
 });
 
@@ -189,6 +200,33 @@ app.post("/api/bookings", bookingLimiter, function (req, res) {
     }
     console.error("booking_submit_failed");
     return res.status(500).json({ error: "Could not submit your booking request. Please try again." });
+  }
+});
+
+app.post("/api/contact-messages", contactLimiter, function (req, res) {
+  try {
+    var result = contactMessageService.validateSubmit(req.body);
+    if (result.error) return res.status(400).json({ error: result.error });
+    var created = contactMessageService.create(result.data);
+    AuditService.write("patient", "contact_message_submitted", null, created.message_id);
+    NotificationService.send("New contact message", {
+      type: "contact_message",
+      message_id: created.message_id,
+      first_name: created.first_name,
+      last_name: created.last_name,
+      email: created.email,
+      phone: created.phone || "",
+      service: created.service || "",
+      message: created.message
+    }).catch(function () {});
+    return res.status(201).json({
+      ok: true,
+      message: "Thank you! Your message was received. We will be in touch shortly.",
+      messageId: created.message_id
+    });
+  } catch (err) {
+    console.error("contact_message_submit_failed");
+    return res.status(500).json({ error: "Could not send your message. Please try again." });
   }
 });
 

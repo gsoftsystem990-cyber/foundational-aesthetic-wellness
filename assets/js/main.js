@@ -138,6 +138,10 @@ async function submitForm(e) {
     alert('Please enter your name and a valid email address.');
     return;
   }
+  if (!message) {
+    alert('Please enter a message.');
+    return;
+  }
 
   if (btn) {
     btn.disabled = true;
@@ -145,16 +149,26 @@ async function submitForm(e) {
   }
 
   try {
-    await sendSiteEmail({
-      _subject: 'New Contact Message — Foundational Aesthetic Wellness',
-      type: 'Contact Form',
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      phone: phone || 'Not provided',
-      service: service || 'Not specified',
-      message: message || 'No message provided'
+    var api = membershipApiBase();
+    if (!api) {
+      throw new Error('Message service is currently unavailable. Please try again later or call 00.');
+    }
+    var res = await fetch(api + '/api/contact-messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        service: service || 'Not specified',
+        message: message
+      })
     });
+    var data = await res.json().catch(function () { return {}; });
+    if (!res.ok) {
+      throw new Error(data.error || 'Could not send your message. Please try again.');
+    }
     form.reset();
     if (okMsg) {
       okMsg.style.display = 'block';
