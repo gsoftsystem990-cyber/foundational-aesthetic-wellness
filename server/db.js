@@ -77,7 +77,11 @@ CREATE TABLE IF NOT EXISTS patients (
   last_name TEXT NOT NULL,
   email TEXT,
   phone_normalized TEXT NOT NULL,
+  phone_display TEXT,
   dob TEXT NOT NULL,
+  address TEXT,
+  notes TEXT,
+  photo_path TEXT,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
@@ -168,6 +172,21 @@ CREATE INDEX IF NOT EXISTS idx_bookings_created ON bookings(created_at);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_created ON contact_messages(created_at);
 `);
+
+  // Add columns for older databases created before patient CRM fields existed.
+  [
+    "ALTER TABLE patients ADD COLUMN phone_display TEXT",
+    "ALTER TABLE patients ADD COLUMN address TEXT",
+    "ALTER TABLE patients ADD COLUMN notes TEXT",
+    "ALTER TABLE patients ADD COLUMN photo_path TEXT"
+  ].forEach(function (sql) {
+    try {
+      fileDb.run(sql);
+    } catch (e) {
+      // column already exists
+    }
+  });
+  persist(fileDb);
   return facade;
 }
 

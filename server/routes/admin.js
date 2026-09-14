@@ -10,12 +10,17 @@ var BookingService = require("../services/BookingService");
 var ContactMessageService = require("../services/ContactMessageService");
 var AuditService = require("../services/AuditService");
 var NotificationService = require("../services/NotificationService");
+var PatientService = require("../services/PatientService");
+var createPatientAdapter = require("../adapters/PatientAdapter").createPatientAdapter;
 var dateFilter = require("../lib/dateFilter");
+var config = require("../config");
+var db = require("../db");
 
 var memberships = new MembershipService();
 var reviews = new ReviewService();
 var bookings = new BookingService();
 var contactMessages = new ContactMessageService();
+var patients = new PatientService(createPatientAdapter(db, config));
 var router = express.Router();
 
 var loginLimiter = rateLimit({
@@ -161,6 +166,76 @@ router.get("/api/account", auth.requireAdmin, function (req, res) {
     username: auth.getAdminUsername(),
     minPasswordLength: auth.MIN_PASSWORD_LEN
   });
+});
+
+router.get("/api/patients", auth.requireAdmin, function (req, res) {
+  var q = String(req.query.q || "");
+  var rows = patients.list(q);
+  res.json({
+    csrf: req.adminSession.csrf_token,
+    patients: rows
+  });
+});
+
+router.get("/api/patients/:id", auth.requireAdmin, function (req, res) {
+  var profile = patients.getProfile(req.params.id);
+  if (!profile) return res.status(404).json({ error: "Patient not found." });
+  res.json({
+    csrf: req.adminSession.csrf_token,
+    patient: profile.patient,
+    records: profile.records
+  });
+});
+
+router.post("/api/patients", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var result = patients.validateProfile(req.body, false);
+  if (result.error) return res.status(400).json({ error: result.error });
+  var created = patients.create(result.data);
+  if (req.body && req.body.photoDataUrl) {
+    var photoResult = patients.savePhotoFromDataUrl(created.patient_id, req.body.photoDataUrl);
+    if (photoResult.error) {
+      return res.status(201).json({
+        ok: true,
+        warning: photoResult.error,
+        patient: patients.toAdminRow(created),
+        csrf: req.adminSession.csrf_token
+      });
+    }
+    created = photoResult.patient;
+  }
+  AuditService.write("admin", "patient_created", null, created.patient_id);
+  res.status(201).json({
+    ok: true,
+    patient: patients.toAdminRow(created),
+    csrf: req.adminSession.csrf_token
+  });
+});
+
+router.post("/api/patients/:id", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var result = patients.validateProfile(req.body, true);
+  if (result.error) return res.status(400).json({ error: result.error });
+  var updated = patients.update(req.params.id, result.data);
+  if (!updated) return res.status(404).json({ error: "Patient not found." });
+  if (req.body && req.body.photoDataUrl) {
+    var photoResult = patients.savePhotoFromDataUrl(updated.patient_id, req.body.photoDataUrl);
+    if (photoResult.error) return res.status(400).json({ error: photoResult.error });
+    updated = photoResult.patient;
+  }
+  if (req.body && req.body.removePhoto) {
+    updated = patients.removePhoto(updated.patient_id);
+  }
+  AuditService.write("admin", "patient_updated", null, updated.patient_id);
+  res.json({
+    ok: true,
+    patient: patients.toAdminRow(updated),
+    csrf: req.adminSession.csrf_token
+  });
+});
+
+router.get("/api/patients/:id/photo", auth.requireAdmin, function (req, res) {
+  var abs = patients.getPhotoAbsolutePath(req.params.id);
+  if (!abs) return res.status(404).json({ error: "Photo not found." });
+  res.sendFile(abs);
 });
 
 router.post("/api/change-password", auth.requireAdmin, auth.requireCsrf, function (req, res) {

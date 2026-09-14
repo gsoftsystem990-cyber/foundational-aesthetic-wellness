@@ -82,7 +82,7 @@ app.use(cors({
 }));
 
 app.use("/webhooks/stripe", express.raw({ type: "application/json" }));
-app.use(express.json({ limit: "16kb" }));
+app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());
 
 var checkoutLimiter = rateLimit({
@@ -209,16 +209,6 @@ app.post("/api/contact-messages", contactLimiter, function (req, res) {
     if (result.error) return res.status(400).json({ error: result.error });
     var created = contactMessageService.create(result.data);
     AuditService.write("patient", "contact_message_submitted", null, created.message_id);
-    NotificationService.send("New contact message", {
-      type: "contact_message",
-      message_id: created.message_id,
-      first_name: created.first_name,
-      last_name: created.last_name,
-      email: created.email,
-      phone: created.phone || "",
-      service: created.service || "",
-      message: created.message
-    }).catch(function () {});
     return res.status(201).json({
       ok: true,
       message: "Thank you! Your message was received. We will be in touch shortly.",

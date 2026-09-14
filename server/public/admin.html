@@ -7,27 +7,28 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root, [data-theme="light"] {
-    --accent: #8f9468;
-    --accent-hover: #7d8258;
-    --accent-soft: rgba(143, 148, 104, 0.14);
-    --bg: #f3f4f0;
+    --accent: #6f7a3a;
+    --accent-hover: #5a642e;
+    --accent-strong: #c4a035;
+    --accent-soft: rgba(111, 122, 58, 0.18);
+    --bg: #eef1e6;
     --bg-elevated: #ffffff;
-    --bg-muted: #ebede6;
-    --bg-hover: #f7f8f5;
-    --border: #d9ddd3;
-    --text: #1f241c;
-    --text-secondary: #5f6758;
-    --text-muted: #848c7c;
-    --shadow: 0 10px 30px rgba(31, 36, 28, 0.06);
-    --shadow-sm: 0 1px 2px rgba(31, 36, 28, 0.05);
-    --ok: #2f6b3c;
-    --ok-bg: #e5f2e8;
-    --warn: #8a6a1f;
-    --warn-bg: #f5efdd;
-    --danger: #9a3434;
-    --danger-bg: #f7e6e6;
-    --info: #2f5f8a;
-    --info-bg: #e6eef6;
+    --bg-muted: #e4e9d8;
+    --bg-hover: #f5f7ee;
+    --border: #c9d0b8;
+    --text: #1a2114;
+    --text-secondary: #4a5538;
+    --text-muted: #6b7658;
+    --shadow: 0 12px 34px rgba(40, 48, 22, 0.1);
+    --shadow-sm: 0 1px 3px rgba(40, 48, 22, 0.08);
+    --ok: #1f7a3a;
+    --ok-bg: #d7f0df;
+    --warn: #b07a00;
+    --warn-bg: #ffe9b8;
+    --danger: #c62828;
+    --danger-bg: #ffd6d6;
+    --info: #1e5fa8;
+    --info-bg: #d6e8ff;
     --sidebar-w: 248px;
     --radius: 14px;
     --radius-sm: 10px;
@@ -37,27 +38,28 @@
   }
 
   [data-theme="dark"] {
-    --accent: #b4ba8e;
-    --accent-hover: #c4c9a2;
-    --accent-soft: rgba(180, 186, 142, 0.16);
-    --bg: #121511;
-    --bg-elevated: #1a1e17;
-    --bg-muted: #22271e;
-    --bg-hover: #242a20;
-    --border: #30362c;
-    --text: #eef0e8;
-    --text-secondary: #b3b9a8;
-    --text-muted: #848c7c;
-    --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-    --ok: #7dbe8b;
-    --ok-bg: rgba(47, 107, 60, 0.28);
-    --warn: #d4b56a;
-    --warn-bg: rgba(138, 106, 31, 0.28);
-    --danger: #e08a8a;
-    --danger-bg: rgba(154, 52, 52, 0.28);
-    --info: #8bb4d9;
-    --info-bg: rgba(47, 95, 138, 0.28);
+    --accent: #c6d16a;
+    --accent-hover: #d7e07f;
+    --accent-strong: #e2c25a;
+    --accent-soft: rgba(198, 209, 106, 0.22);
+    --bg: #0f130c;
+    --bg-elevated: #1a2115;
+    --bg-muted: #242c1c;
+    --bg-hover: #2b3422;
+    --border: #3d4a30;
+    --text: #f3f6e8;
+    --text-secondary: #c5cfa8;
+    --text-muted: #93a078;
+    --shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+    --ok: #5fdb86;
+    --ok-bg: rgba(31, 122, 58, 0.38);
+    --warn: #f0c14a;
+    --warn-bg: rgba(176, 122, 0, 0.35);
+    --danger: #ff7a7a;
+    --danger-bg: rgba(198, 40, 40, 0.35);
+    --info: #6db0ff;
+    --info-bg: rgba(30, 95, 168, 0.35);
     color-scheme: dark;
   }
 
@@ -191,7 +193,7 @@
     margin-top: 6px;
     border: 0;
     border-radius: var(--radius-sm);
-    background: var(--accent);
+    background: linear-gradient(145deg, var(--accent-strong), var(--accent));
     color: #fff;
     padding: 13px 16px;
     font-size: 13px;
@@ -249,7 +251,7 @@
     width: 34px;
     height: 34px;
     border-radius: 10px;
-    background: linear-gradient(145deg, var(--accent), #6f7550);
+    background: linear-gradient(145deg, var(--accent-strong), var(--accent));
     display: grid;
     place-items: center;
     color: #fff;
@@ -294,7 +296,7 @@
   .nav button:hover { background: var(--bg-hover); color: var(--text); }
   .nav button.active {
     background: var(--accent-soft);
-    color: var(--text);
+    color: var(--accent);
   }
   .nav-ico {
     width: 18px;
@@ -548,6 +550,224 @@
     font-weight: 400;
   }
 
+  .patient-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .patient-list-card, .patient-detail-card {
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .patient-list-tools {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .patient-list-tools input[type="search"] {
+    flex: 1;
+    min-width: 140px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  .patient-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 70vh;
+    overflow: auto;
+  }
+  .patient-list-item {
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    color: inherit;
+  }
+  .patient-list-item:hover, .patient-list-item.is-active {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .patient-avatar, .patient-avatar-lg {
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--bg-muted);
+    border: 1px solid var(--border);
+    flex: 0 0 auto;
+  }
+  .patient-avatar { width: 42px; height: 42px; }
+  .patient-avatar-lg { width: 96px; height: 96px; }
+  .patient-avatar-fallback {
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: var(--bg-hover);
+  }
+  .patient-list-item strong { display: block; font-size: 13px; }
+  .patient-list-item span { display: block; font-size: 12px; color: var(--text-muted); }
+  .patient-profile-head {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .patient-profile-head h3 { margin: 0 0 4px; font-size: 20px; }
+  .patient-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .patient-form-grid .fg-full { grid-column: 1 / -1; }
+  .patient-form-grid textarea {
+    width: 100%;
+    min-height: 90px;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font: inherit;
+    resize: vertical;
+  }
+  .patient-form-grid input[type="text"],
+  .patient-form-grid input[type="email"],
+  .patient-form-grid input[type="tel"],
+  .patient-form-grid input[type="date"] {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .patient-records {
+    margin-top: 18px;
+    display: grid;
+    gap: 12px;
+  }
+  .patient-record-block {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elevated);
+    padding: 12px;
+  }
+  .patient-record-block h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+  .patient-record-block ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+  .patient-record-block li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .patient-record-block li:first-child { border-top: 0; padding-top: 0; }
+  .patient-empty {
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 24px 8px;
+    text-align: center;
+  }
+  .photo-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .photo-card {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 14px;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-elevated);
+  }
+  .photo-pick {
+    position: relative;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  .photo-pick:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  .photo-pick .patient-avatar-lg {
+    display: block;
+  }
+  .photo-pick-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(20, 24, 18, 0.55);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .photo-pick:hover .photo-pick-overlay { opacity: 1; }
+  .photo-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .photo-actions h4 {
+    margin: 0;
+    font-size: 14px;
+  }
+  .photo-actions p {
+    margin: 0 0 4px;
+    font-size: 12px;
+    color: var(--text-muted);
+    max-width: 36ch;
+    line-height: 1.45;
+  }
+  .photo-actions .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  #patientPhotoInput { display: none; }
+
   @media (max-width: 960px) {
     .app { grid-template-columns: 1fr; }
     .sidebar {
@@ -579,6 +799,8 @@
     }
     .content { padding: 16px 14px 32px; }
     .topbar { padding: 12px 14px; }
+    .patient-layout { grid-template-columns: 1fr; }
+    .patient-form-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -631,6 +853,10 @@
         <button type="button" data-tab="memberships">
           <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm1 3v2h16V9H4zm0 4v4h16v-4H4z"/></svg></span>
           Memberships
+        </button>
+        <button type="button" data-tab="patients">
+          <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg></span>
+          Patients
         </button>
         <button type="button" data-tab="settings">
           <span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.07 7.07 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.58.23-1.12.54-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.83 14.1a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.5.4 1.05.71 1.63.94l.36 2.54c.05.24.25.42.49.42h3.8c.24 0 .44-.18.49-.42l.36-2.54c.58-.23 1.12-.54 1.63-.94l2.39.96c.24.1.51 0 .64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg></span>
@@ -828,6 +1054,30 @@
           </div>
         </section>
 
+        <section class="panel panel-card" id="panel-patients" hidden>
+          <div class="panel-head">
+            <div>
+              <h3>Patients</h3>
+              <p class="muted">Create and manage patient profiles. Bookings, messages, reviews, and memberships linked by email/phone appear on each profile.</p>
+            </div>
+            <div class="toolbar">
+              <button type="button" class="btn-ghost" id="newPatientBtn">New patient</button>
+              <button type="button" class="btn-ghost" id="refreshPatients">Refresh</button>
+            </div>
+          </div>
+          <div class="patient-layout">
+            <div class="patient-list-card">
+              <div class="patient-list-tools">
+                <input type="search" id="patientSearch" placeholder="Search name, email, phone...">
+              </div>
+              <div class="patient-list" id="patientList"></div>
+            </div>
+            <div class="patient-detail-card" id="patientDetail">
+              <p class="patient-empty">Select a patient or create a new profile.</p>
+            </div>
+          </div>
+        </section>
+
         <section class="panel panel-card" id="panel-settings" hidden>
           <div class="settings-theme-block">
             <div>
@@ -874,8 +1124,13 @@
     messages: { title: "Messages", subtitle: "Contact form inquiries" },
     comments: { title: "Comments", subtitle: "Review moderation queue" },
     memberships: { title: "Memberships", subtitle: "Plan enrollments and renewals" },
+    patients: { title: "Patients", subtitle: "Profiles, photos, and linked records" },
     settings: { title: "Settings", subtitle: "Appearance and account security" }
   };
+  var selectedPatientId = "";
+  var patientPhotoDataUrl = "";
+  var patientPhotoRemoved = false;
+  var patientsCache = [];
 
   function themeToggleHtml(idPrefix) {
     return '' +
@@ -947,6 +1202,7 @@
     document.getElementById("panel-messages").hidden = name !== "messages";
     document.getElementById("panel-comments").hidden = name !== "comments";
     document.getElementById("panel-memberships").hidden = name !== "memberships";
+    document.getElementById("panel-patients").hidden = name !== "patients";
     document.getElementById("panel-settings").hidden = name !== "settings";
     var meta = PAGE_META[name] || PAGE_META.bookings;
     var title = document.getElementById("pageTitle");
@@ -954,6 +1210,7 @@
     if (title) title.textContent = meta.title;
     if (subtitle) subtitle.textContent = meta.subtitle;
     if (name === "settings") loadAccount();
+    if (name === "patients") loadPatients();
   }
 
   function showPasswordMsg(err, ok) {
@@ -1275,11 +1532,309 @@
     showDash();
   }
 
+  function initials(first, last) {
+    return ((first || "").charAt(0) + (last || "").charAt(0)).toUpperCase() || "?";
+  }
+
+  function avatarHtml(patient, large) {
+    var cls = large ? "patient-avatar-lg" : "patient-avatar";
+    if (patient && patient.photo_url) {
+      return '<img class="' + cls + '" src="' + patient.photo_url + '?t=' + encodeURIComponent(patient.updated_at || Date.now()) + '" alt="">';
+    }
+    return '<div class="' + cls + ' patient-avatar-fallback" aria-hidden="true">' + initials(patient && patient.first_name, patient && patient.last_name) + "</div>";
+  }
+
+  function recordList(items, emptyText, renderItem) {
+    if (!items || !items.length) return '<p class="patient-empty" style="padding:8px 0;text-align:left">' + emptyText + "</p>";
+    return "<ul>" + items.map(renderItem).join("") + "</ul>";
+  }
+
+  function renderPatientList(list) {
+    var box = document.getElementById("patientList");
+    if (!box) return;
+    box.innerHTML = "";
+    if (!list.length) {
+      box.innerHTML = '<p class="patient-empty">No patients yet. Click New patient.</p>';
+      return;
+    }
+    list.forEach(function (p) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "patient-list-item" + (p.patient_id === selectedPatientId ? " is-active" : "");
+      btn.innerHTML = avatarHtml(p, false) +
+        "<div><strong>" + escapeHtml((p.first_name || "") + " " + (p.last_name || "")) + "</strong>" +
+        "<span>" + escapeHtml(p.phone || p.email || "No contact") + "</span></div>";
+      btn.addEventListener("click", function () { openPatientProfile(p.patient_id); });
+      box.appendChild(btn);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderPatientEditor(patient, records, isNew) {
+    var detail = document.getElementById("patientDetail");
+    if (!detail) return;
+    patient = patient || {};
+    records = records || { bookings: [], messages: [], reviews: [], memberships: [] };
+    var hasPhoto = Boolean(patientPhotoDataUrl || (!patientPhotoRemoved && patient.has_photo));
+    var photoPreview = patientPhotoDataUrl
+      ? '<img class="patient-avatar-lg" src="' + patientPhotoDataUrl + '" alt="Patient photo preview">'
+      : (patientPhotoRemoved ? '<div class="patient-avatar-lg patient-avatar-fallback" aria-hidden="true">' + initials(patient.first_name, patient.last_name) + "</div>" : avatarHtml(patient, true));
+
+    detail.innerHTML =
+      "<div>" +
+        "<h3>" + (isNew ? "New patient" : escapeHtml((patient.first_name || "") + " " + (patient.last_name || ""))) + "</h3>" +
+        '<p class="muted">' + (isNew ? "Add a photo and details, then save the profile." : ("ID: " + escapeHtml(patient.patient_id || ""))) + "</p>" +
+      "</div>" +
+      '<div class="photo-card">' +
+        '<button type="button" class="photo-pick" id="patientPhotoPickBtn" title="Add or change photo">' +
+          photoPreview +
+          '<span class="photo-pick-overlay">' + (hasPhoto ? "Change" : "Add photo") + "</span>" +
+        "</button>" +
+        '<div class="photo-actions">' +
+          "<h4>Patient photo</h4>" +
+          "<p>Upload a JPG, PNG, or WEBP (max about 1.5 MB). Click the circle or use the button.</p>" +
+          '<div class="btn-row">' +
+            '<button type="button" class="btn-primary" id="addPatientPhotoBtn" style="width:auto;min-width:140px">' +
+              (hasPhoto ? "Change photo" : "Add photo") +
+            "</button>" +
+            (hasPhoto ? '<button type="button" class="btn-ghost" id="removePatientPhotoBtn">Remove photo</button>' : "") +
+          "</div>" +
+          '<input type="file" id="patientPhotoInput" accept="image/png,image/jpeg,image/webp,image/*">' +
+        "</div>" +
+      "</div>" +
+      '<form id="patientForm">' +
+        '<div class="patient-form-grid">' +
+          '<div class="fg"><label for="pFirst">First name *</label><input id="pFirst" type="text" required value="' + escapeHtml(patient.first_name || "") + '"></div>' +
+          '<div class="fg"><label for="pLast">Last name *</label><input id="pLast" type="text" required value="' + escapeHtml(patient.last_name || "") + '"></div>' +
+          '<div class="fg"><label for="pEmail">Email</label><input id="pEmail" type="email" value="' + escapeHtml(patient.email || "") + '"></div>' +
+          '<div class="fg"><label for="pPhone">Phone *</label><input id="pPhone" type="tel" required value="' + escapeHtml(patient.phone || "") + '"></div>' +
+          '<div class="fg"><label for="pDob">Date of birth</label><input id="pDob" type="date" value="' + escapeHtml(patient.dob || "") + '"></div>' +
+          '<div class="fg"><label for="pExternal">Chart / external ID</label><input id="pExternal" type="text" value="' + escapeHtml(patient.external_patient_id || "") + '"></div>' +
+          '<div class="fg fg-full"><label for="pAddress">Address</label><input id="pAddress" type="text" value="' + escapeHtml(patient.address || "") + '"></div>' +
+          '<div class="fg fg-full"><label for="pNotes">Notes</label><textarea id="pNotes">' + escapeHtml(patient.notes || "") + "</textarea></div>" +
+        "</div>" +
+        '<div class="toolbar" style="margin-top:14px">' +
+          '<button type="submit" class="btn-primary" id="patientSaveBtn" style="width:auto;min-width:160px">' + (isNew ? "Create patient" : "Save profile") + "</button>" +
+          (!isNew ? '<button type="button" class="btn-ghost" id="patientRefreshBtn">Reload records</button>' : "") +
+        "</div>" +
+        '<p class="err" id="patientErr" hidden></p>' +
+        '<p class="ok-msg" id="patientOk" hidden></p>' +
+      "</form>" +
+      (isNew ? "" :
+        '<div class="patient-records">' +
+          '<div class="patient-record-block"><h4>Bookings (' + records.bookings.length + ")</h4>" +
+            recordList(records.bookings, "No linked bookings yet.", function (b) {
+              return "<li><strong>" + escapeHtml(b.service || "Booking") + "</strong> · " + escapeHtml(b.status) +
+                "<br>" + escapeHtml(b.preferred_time || "No slot") + " · " + escapeHtml(formatDate(b.created_at)) + "</li>";
+            }) +
+          "</div>" +
+          '<div class="patient-record-block"><h4>Messages (' + records.messages.length + ")</h4>" +
+            recordList(records.messages, "No linked contact messages.", function (m) {
+              return "<li><strong>" + escapeHtml(m.status) + "</strong> · " + escapeHtml(formatDate(m.created_at)) +
+                "<br>" + escapeHtml(m.message || "") + "</li>";
+            }) +
+          "</div>" +
+          '<div class="patient-record-block"><h4>Reviews (' + records.reviews.length + ")</h4>" +
+            recordList(records.reviews, "No linked reviews.", function (r) {
+              return "<li><strong>" + escapeHtml(String(r.rating)) + "/5</strong> · " + escapeHtml(r.status) +
+                "<br>" + escapeHtml(r.text || "") + "</li>";
+            }) +
+          "</div>" +
+          '<div class="patient-record-block"><h4>Memberships (' + records.memberships.length + ")</h4>" +
+            recordList(records.memberships, "No memberships on this profile.", function (m) {
+              return "<li><strong>" + escapeHtml(m.membership_plan_id || "Plan") + "</strong> · " + escapeHtml(m.status) +
+                "<br>Renewal: " + escapeHtml(formatDate(m.renewal_date)) + "</li>";
+            }) +
+          "</div>" +
+        "</div>");
+
+    var fileInput = document.getElementById("patientPhotoInput");
+    function openPhotoPicker() {
+      if (fileInput) fileInput.click();
+    }
+    var pickBtn = document.getElementById("patientPhotoPickBtn");
+    var addBtn = document.getElementById("addPatientPhotoBtn");
+    if (pickBtn) pickBtn.addEventListener("click", openPhotoPicker);
+    if (addBtn) addBtn.addEventListener("click", openPhotoPicker);
+
+    if (fileInput) {
+      fileInput.addEventListener("change", function () {
+        var file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        if (file.size > 1.5 * 1024 * 1024) {
+          alert("Photo is too large. Please use an image under about 1.5 MB.");
+          fileInput.value = "";
+          return;
+        }
+        var reader = new FileReader();
+        reader.onload = function () {
+          patientPhotoDataUrl = String(reader.result || "");
+          patientPhotoRemoved = false;
+          renderPatientEditor(patient, records, isNew);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    var removeBtn = document.getElementById("removePatientPhotoBtn");
+    if (removeBtn) {
+      removeBtn.addEventListener("click", function () {
+        patientPhotoDataUrl = "";
+        patientPhotoRemoved = true;
+        if (isNew) {
+          renderPatientEditor(patient, records, true);
+          return;
+        }
+        // Keep editor updated immediately; persist on Save or call save now.
+        renderPatientEditor(Object.assign({}, patient, { has_photo: false, photo_url: "" }), records, false);
+      });
+    }
+
+    var form = document.getElementById("patientForm");
+    if (form) {
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        savePatient(false);
+      });
+    }
+    var reloadBtn = document.getElementById("patientRefreshBtn");
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", function () {
+        openPatientProfile(selectedPatientId);
+      });
+    }
+  }
+
+  function showPatientMsg(err, ok) {
+    var errEl = document.getElementById("patientErr");
+    var okEl = document.getElementById("patientOk");
+    if (errEl) {
+      errEl.hidden = !err;
+      errEl.textContent = err || "";
+    }
+    if (okEl) {
+      okEl.hidden = !ok;
+      okEl.textContent = ok || "";
+    }
+  }
+
+  async function loadPatients() {
+    var q = (document.getElementById("patientSearch") || {}).value || "";
+    var url = "/admin/api/patients" + (q ? ("?q=" + encodeURIComponent(q)) : "");
+    var res = await fetch(url, { credentials: "same-origin" });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    var data = await res.json().catch(function () { return {}; });
+    csrf = data.csrf || csrf;
+    patientsCache = data.patients || [];
+    renderPatientList(patientsCache);
+    showDash();
+  }
+
+  async function openPatientProfile(id) {
+    selectedPatientId = id;
+    patientPhotoDataUrl = "";
+    patientPhotoRemoved = false;
+    renderPatientList(patientsCache);
+    var res = await fetch("/admin/api/patients/" + encodeURIComponent(id), { credentials: "same-origin" });
+    if (res.status === 401) {
+      showLogin();
+      return;
+    }
+    if (!res.ok) {
+      document.getElementById("patientDetail").innerHTML = '<p class="patient-empty">Could not load patient profile.</p>';
+      return;
+    }
+    var data = await res.json();
+    csrf = data.csrf || csrf;
+    renderPatientEditor(data.patient, data.records, false);
+  }
+
+  function startNewPatient() {
+    selectedPatientId = "";
+    patientPhotoDataUrl = "";
+    patientPhotoRemoved = false;
+    renderPatientList(patientsCache);
+    renderPatientEditor({
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone: "",
+      dob: "",
+      address: "",
+      notes: "",
+      external_patient_id: ""
+    }, null, true);
+  }
+
+  async function savePatient() {
+    showPatientMsg("", "");
+    var btn = document.getElementById("patientSaveBtn");
+    var payload = {
+      firstName: (document.getElementById("pFirst") || {}).value || "",
+      lastName: (document.getElementById("pLast") || {}).value || "",
+      email: (document.getElementById("pEmail") || {}).value || "",
+      phone: (document.getElementById("pPhone") || {}).value || "",
+      dob: (document.getElementById("pDob") || {}).value || "",
+      address: (document.getElementById("pAddress") || {}).value || "",
+      notes: (document.getElementById("pNotes") || {}).value || "",
+      externalPatientId: (document.getElementById("pExternal") || {}).value || ""
+    };
+    if (patientPhotoDataUrl) payload.photoDataUrl = patientPhotoDataUrl;
+    if (patientPhotoRemoved && !patientPhotoDataUrl) payload.removePhoto = true;
+
+    var isNew = !selectedPatientId;
+    var url = isNew ? "/admin/api/patients" : ("/admin/api/patients/" + encodeURIComponent(selectedPatientId));
+    if (btn) btn.disabled = true;
+    try {
+      var res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrf,
+          Accept: "application/json"
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(payload)
+      });
+      var data = await res.json().catch(function () { return {}; });
+      if (res.status === 401) {
+        showLogin();
+        return;
+      }
+      if (!res.ok) {
+        showPatientMsg(data.error || "Could not save patient.", "");
+        return;
+      }
+      csrf = data.csrf || csrf;
+      patientPhotoDataUrl = "";
+      patientPhotoRemoved = false;
+      selectedPatientId = data.patient.patient_id;
+      showPatientMsg("", data.warning ? ("Saved, but photo issue: " + data.warning) : "Patient profile saved.");
+      await loadPatients();
+      await openPatientProfile(selectedPatientId);
+    } catch (e) {
+      showPatientMsg("Could not reach the server.", "");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
   async function loadAll() {
     await loadBookings();
     await loadMessages();
     await loadReviews();
     await loadMemberships();
+    await loadPatients();
   }
 
   document.querySelectorAll(".tabs button").forEach(function (btn) {
@@ -1327,6 +1882,19 @@
   document.getElementById("bookingStatus").addEventListener("change", loadBookings);
   document.getElementById("refreshMessages").addEventListener("click", loadMessages);
   document.getElementById("messageStatus").addEventListener("change", loadMessages);
+  document.getElementById("refreshPatients").addEventListener("click", loadPatients);
+  document.getElementById("newPatientBtn").addEventListener("click", startNewPatient);
+  document.getElementById("patientSearch").addEventListener("input", function () {
+    var q = String(document.getElementById("patientSearch").value || "").trim().toLowerCase();
+    if (!q) {
+      renderPatientList(patientsCache);
+      return;
+    }
+    renderPatientList(patientsCache.filter(function (p) {
+      var blob = [p.first_name, p.last_name, p.email, p.phone, p.notes, p.address].join(" ").toLowerCase();
+      return blob.indexOf(q) !== -1;
+    }));
+  });
   document.getElementById("passwordForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     showPasswordMsg("", "");

@@ -17,7 +17,6 @@ Create `server/.env` from `server/.env.example` on the machine that runs this AP
 | `ALLOWED_ORIGINS` | `server/.env` | CORS allow-list for the website origin. |
 | `SESSION_SECRET` | `server/.env` | Required in production. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | `server/.env` | Staff dashboard at `/admin`. |
-| `NOTIFY_EMAIL` | `server/.env` | Office alerts (no card data). |
 | `PATIENT_ADAPTER` | `server/.env` | `local` or `http`. |
 | `membershipApiUrl` | `assets/js/site-config.js` | Public URL of this API, e.g. `https://api.example.com`. Not a Stripe secret. |
 

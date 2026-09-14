@@ -78,31 +78,6 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
 }
 
-async function sendSiteEmail(payload) {
-  var config = window.FAW_SITE_CONFIG || {};
-  var notifyEmail = config.notifyEmail || 'malikkhan0225@gmail.com';
-  var body = Object.assign({
-    _template: 'table',
-    _captcha: 'false'
-  }, payload);
-
-  var res = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(notifyEmail), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-
-  var data = await res.json().catch(function () { return {}; });
-  if (!res.ok || (data && (data.success === 'false' || data.success === false))) {
-    throw new Error((data && data.message) || 'Unable to send. Please try again.');
-  }
-
-  return data;
-}
-
 function membershipApiBase() {
   var config = window.FAW_SITE_CONFIG || {};
   if (config.membershipApiUrl) return String(config.membershipApiUrl).replace(/\/$/, '');

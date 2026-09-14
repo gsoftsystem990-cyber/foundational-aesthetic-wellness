@@ -19,20 +19,20 @@ LocalPatientAdapter.prototype.matchOrCreate = function (input) {
   }
   if (!existing) {
     existing = this.db.prepare(
-      "SELECT * FROM patients WHERE last_name = ? AND dob = ? AND phone_normalized = ?"
+      "SELECT * FROM patients WHERE lower(last_name) = ? AND dob = ? AND phone_normalized = ?"
     ).get(lastName, dob, phone);
   }
 
   if (existing) {
     this.db.prepare(
-      "UPDATE patients SET first_name = ?, email = ?, external_patient_id = COALESCE(external_patient_id, ?), updated_at = ? WHERE patient_id = ?"
-    ).run(input.firstName, input.email, externalId || null, now, existing.patient_id);
+      "UPDATE patients SET first_name = ?, email = ?, phone_display = COALESCE(?, phone_display), external_patient_id = COALESCE(external_patient_id, ?), updated_at = ? WHERE patient_id = ?"
+    ).run(input.firstName, input.email, input.phone || null, externalId || null, now, existing.patient_id);
     return this.db.prepare("SELECT * FROM patients WHERE patient_id = ?").get(existing.patient_id);
   }
 
   var patientId = ids.newId("pat");
   this.db.prepare(
-    "INSERT INTO patients (patient_id, external_patient_id, first_name, last_name, email, phone_normalized, dob, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    "INSERT INTO patients (patient_id, external_patient_id, first_name, last_name, email, phone_normalized, phone_display, dob, address, notes, photo_path, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '', NULL, ?, ?)"
   ).run(
     patientId,
     externalId || null,
@@ -40,6 +40,7 @@ LocalPatientAdapter.prototype.matchOrCreate = function (input) {
     lastName,
     input.email,
     phone,
+    input.phone || phone,
     dob,
     now,
     now

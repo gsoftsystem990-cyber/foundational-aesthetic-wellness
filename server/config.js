@@ -38,7 +38,6 @@ var config = {
   port: Number(env("PORT", "4242")),
   publicSiteUrl: env("PUBLIC_SITE_URL", "").replace(/\/$/, ""),
   allowedOrigins: csv("ALLOWED_ORIGINS"),
-  notifyEmail: env("NOTIFY_EMAIL", ""),
   sessionSecret: env("SESSION_SECRET", ""),
   adminUsername: env("ADMIN_USERNAME", ""),
   adminPassword: env("ADMIN_PASSWORD", ""),
