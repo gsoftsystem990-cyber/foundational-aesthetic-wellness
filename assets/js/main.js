@@ -591,32 +591,49 @@ function initServicesCarousel() {
   if (!root) return;
 
   var track = root.querySelector('[data-svc-track]');
+  var viewport = root.querySelector('.svc-carousel__viewport');
   var prevBtn = root.querySelector('[data-svc-prev]');
   var nextBtn = root.querySelector('[data-svc-next]');
   var dotsWrap = document.querySelector('[data-svc-dots]');
-  var cards = track ? track.querySelectorAll('.service-tile') : [];
-  if (!track || !cards.length) return;
+  var cards = track ? Array.prototype.slice.call(track.querySelectorAll('.service-tile')) : [];
+  if (!track || !viewport || !cards.length) return;
 
   var index = 0;
   var startX = 0;
   var deltaX = 0;
   var dragging = false;
+  var swiped = false;
+  var dragStep = 0;
+  var resizeTimer = null;
 
   function visibleCount() {
+    // Phones/tablets: always one tile so next/prev + swipe feel clear
+    if (window.matchMedia('(max-width: 860px)').matches) return 1;
     var styles = window.getComputedStyle(root);
     var raw = styles.getPropertyValue('--svc-visible').trim();
     var n = parseInt(raw, 10);
-    return Number.isFinite(n) && n > 0 ? n : 1;
+    return Number.isFinite(n) && n > 0 ? n : 3;
+  }
+
+  function gapSize() {
+    return parseFloat(window.getComputedStyle(track).gap) || 0;
   }
 
   function maxIndex() {
     return Math.max(0, cards.length - visibleCount());
   }
 
-  function stepSize() {
-    var gap = parseFloat(window.getComputedStyle(track).gap) || 0;
-    var cardWidth = cards[0].getBoundingClientRect().width;
-    return cardWidth + gap;
+  function layoutCards() {
+    var viewW = viewport.getBoundingClientRect().width;
+    var visible = visibleCount();
+    var gap = gapSize();
+    var cardW = (viewW - gap * Math.max(0, visible - 1)) / visible;
+    cards.forEach(function (card) {
+      card.style.flex = '0 0 ' + cardW + 'px';
+      card.style.width = cardW + 'px';
+      card.style.maxWidth = cardW + 'px';
+    });
+    return cardW + gap;
   }
 
   function renderDots() {
@@ -627,7 +644,7 @@ function initServicesCarousel() {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'svc-carousel__dot' + (i === index ? ' is-active' : '');
-      btn.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      btn.setAttribute('aria-label', 'Go to treatment ' + (i + 1));
       btn.setAttribute('aria-selected', i === index ? 'true' : 'false');
       (function (page) {
         btn.addEventListener('click', function () {
@@ -640,10 +657,11 @@ function initServicesCarousel() {
   }
 
   function update() {
+    var step = layoutCards();
     var max = maxIndex();
     if (index > max) index = max;
     if (index < 0) index = 0;
-    track.style.transform = 'translateX(-' + (index * stepSize()) + 'px)';
+    track.style.transform = 'translate3d(-' + (index * step) + 'px,0,0)';
     if (prevBtn) prevBtn.disabled = index <= 0;
     if (nextBtn) nextBtn.disabled = index >= max;
     if (dotsWrap) {
@@ -673,34 +691,59 @@ function initServicesCarousel() {
     });
   }
 
+  // Block accidental link opens after a swipe
+  track.addEventListener('click', function (e) {
+    if (!swiped) return;
+    e.preventDefault();
+    e.stopPropagation();
+    swiped = false;
+  }, true);
+
   track.addEventListener('touchstart', function (e) {
     if (!e.touches || !e.touches.length) return;
     dragging = true;
+    swiped = false;
     startX = e.touches[0].clientX;
     deltaX = 0;
+    dragStep = layoutCards();
+    track.style.transition = 'none';
   }, { passive: true });
 
   track.addEventListener('touchmove', function (e) {
     if (!dragging || !e.touches || !e.touches.length) return;
     deltaX = e.touches[0].clientX - startX;
+    if (Math.abs(deltaX) > 8) swiped = true;
+    var base = index * dragStep;
+    track.style.transform = 'translate3d(-' + (base - deltaX) + 'px,0,0)';
   }, { passive: true });
 
   track.addEventListener('touchend', function () {
     if (!dragging) return;
     dragging = false;
-    if (Math.abs(deltaX) > 40) {
+    track.style.transition = '';
+    if (Math.abs(deltaX) > 50) {
       index += deltaX < 0 ? 1 : -1;
-      update();
     }
     deltaX = 0;
+    update();
   });
 
   window.addEventListener('resize', function () {
-    update();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(update, 120);
+  });
+
+  // Re-layout after images load so card height/width settle
+  cards.forEach(function (card) {
+    var img = card.querySelector('img');
+    if (img && !img.complete) {
+      img.addEventListener('load', update, { once: true });
+    }
   });
 
   renderDots();
   update();
+  requestAnimationFrame(update);
 }
 
 initServicesCarousel();
