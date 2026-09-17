@@ -85,7 +85,8 @@ function membershipApiBase() {
   if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
     return 'http://localhost:4242';
   }
-  return '';
+  // Production: site + API share the same host (Express serves both).
+  return location.origin;
 }
 
 async function submitForm(e) {
@@ -499,7 +500,7 @@ function markReveal(el, cls) {
   el.classList.add(cls || 'reveal');
 }
 
-document.querySelectorAll('.service-tile').forEach(function (el, i) {
+document.querySelectorAll('.svc-carousel .service-tile').forEach(function (el, i) {
   markReveal(el, 'reveal-scale');
   el.style.transitionDelay = (i % 3) * 0.1 + 's';
 });
@@ -585,4 +586,122 @@ if (!reduceMotion) {
   });
 }
 
+function initServicesCarousel() {
+  var root = document.querySelector('[data-svc-carousel]');
+  if (!root) return;
+
+  var track = root.querySelector('[data-svc-track]');
+  var prevBtn = root.querySelector('[data-svc-prev]');
+  var nextBtn = root.querySelector('[data-svc-next]');
+  var dotsWrap = document.querySelector('[data-svc-dots]');
+  var cards = track ? track.querySelectorAll('.service-tile') : [];
+  if (!track || !cards.length) return;
+
+  var index = 0;
+  var startX = 0;
+  var deltaX = 0;
+  var dragging = false;
+
+  function visibleCount() {
+    var styles = window.getComputedStyle(root);
+    var raw = styles.getPropertyValue('--svc-visible').trim();
+    var n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : 1;
+  }
+
+  function maxIndex() {
+    return Math.max(0, cards.length - visibleCount());
+  }
+
+  function stepSize() {
+    var gap = parseFloat(window.getComputedStyle(track).gap) || 0;
+    var cardWidth = cards[0].getBoundingClientRect().width;
+    return cardWidth + gap;
+  }
+
+  function renderDots() {
+    if (!dotsWrap) return;
+    var pages = maxIndex() + 1;
+    dotsWrap.innerHTML = '';
+    for (var i = 0; i < pages; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'svc-carousel__dot' + (i === index ? ' is-active' : '');
+      btn.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+      btn.setAttribute('aria-selected', i === index ? 'true' : 'false');
+      (function (page) {
+        btn.addEventListener('click', function () {
+          index = page;
+          update();
+        });
+      })(i);
+      dotsWrap.appendChild(btn);
+    }
+  }
+
+  function update() {
+    var max = maxIndex();
+    if (index > max) index = max;
+    if (index < 0) index = 0;
+    track.style.transform = 'translateX(-' + (index * stepSize()) + 'px)';
+    if (prevBtn) prevBtn.disabled = index <= 0;
+    if (nextBtn) nextBtn.disabled = index >= max;
+    if (dotsWrap) {
+      var dots = dotsWrap.querySelectorAll('.svc-carousel__dot');
+      if (dots.length !== max + 1) {
+        renderDots();
+      } else {
+        dots.forEach(function (dot, i) {
+          var on = i === index;
+          dot.classList.toggle('is-active', on);
+          dot.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      }
+    }
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function () {
+      index -= 1;
+      update();
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function () {
+      index += 1;
+      update();
+    });
+  }
+
+  track.addEventListener('touchstart', function (e) {
+    if (!e.touches || !e.touches.length) return;
+    dragging = true;
+    startX = e.touches[0].clientX;
+    deltaX = 0;
+  }, { passive: true });
+
+  track.addEventListener('touchmove', function (e) {
+    if (!dragging || !e.touches || !e.touches.length) return;
+    deltaX = e.touches[0].clientX - startX;
+  }, { passive: true });
+
+  track.addEventListener('touchend', function () {
+    if (!dragging) return;
+    dragging = false;
+    if (Math.abs(deltaX) > 40) {
+      index += deltaX < 0 ? 1 : -1;
+      update();
+    }
+    deltaX = 0;
+  });
+
+  window.addEventListener('resize', function () {
+    update();
+  });
+
+  renderDots();
+  update();
+}
+
+initServicesCarousel();
 initBookModal();

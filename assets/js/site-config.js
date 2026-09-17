@@ -9,12 +9,12 @@ window.FAW_SITE_CONFIG = {
   reviewsBinId: '',
   reviewsBinKey: '',
 
-  // Live public website URL (GitHub Pages).
+  // Live public website URL (custom domain).
   publicSiteUrl: 'https://gsoftsystem990-cyber.github.io/foundational-aesthetic-wellness/',
 
   // Public origin of the membership API (not a Stripe secret).
-  // Local default is http://localhost:4242 when this value is empty.
-  // Required on GitHub Pages so reviews can submit/load from the API.
+  // Empty = same origin as the website (recommended when Express serves site + /admin).
+  // Local file/localhost previews still fall back to http://localhost:4242 in JS.
   membershipApiUrl: '',
 
   googlePlaceId: 'ChIJgxBm5BSVxokRzDPdSMCUzT4',

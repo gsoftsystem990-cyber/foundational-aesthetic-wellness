@@ -73,6 +73,22 @@ app.use(cors({
       if (!config.isProduction && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")) {
         return cb(null, true);
       }
+      // Production: allow same-site custom domain / Render / Railway hostnames
+      // when PUBLIC_SITE_URL hostname matches, or *.onrender.com / *.up.railway.app
+      if (config.isProduction) {
+        if (config.publicSiteUrl) {
+          var siteHost = new URL(config.publicSiteUrl).hostname.replace(/^www\./, "");
+          var originHost = parsed.hostname.replace(/^www\./, "");
+          if (originHost === siteHost) return cb(null, true);
+        }
+        if (
+          /\.onrender\.com$/i.test(parsed.hostname) ||
+          /\.up\.railway\.app$/i.test(parsed.hostname) ||
+          /\.railway\.app$/i.test(parsed.hostname)
+        ) {
+          return cb(null, true);
+        }
+      }
     } catch (e) { /* ignore */ }
 
     return cb(new Error("Origin not allowed"));

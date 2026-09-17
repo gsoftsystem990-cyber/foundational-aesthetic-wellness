@@ -1,0 +1,27 @@
+# Deploy site + admin on Render (not GitHub Pages).
+# Dashboard: https://dashboard.render.com → New → Blueprint → connect this repo
+# Or: render blueprint apply
+
+services:
+  - type: web
+    name: faw-site
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4242"
+      - key: PUBLIC_SITE_URL
+        value: https://foundationalaestheticwellness.com
+      - key: ALLOWED_ORIGINS
+        value: https://foundationalaestheticwellness.com,https://www.foundationalaestheticwellness.com
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: PATIENT_ADAPTER
+        value: local

@@ -62,6 +62,22 @@ var config = {
   }
 };
 
+// Always allow the configured public site origin(s) in CORS.
+if (config.publicSiteUrl) {
+  try {
+    var siteOrigin = new URL(config.publicSiteUrl).origin;
+    if (config.allowedOrigins.indexOf(siteOrigin) === -1) {
+      config.allowedOrigins.push(siteOrigin);
+    }
+    if (siteOrigin.indexOf("://www.") === -1) {
+      var www = siteOrigin.replace("://", "://www.");
+      if (config.allowedOrigins.indexOf(www) === -1) {
+        config.allowedOrigins.push(www);
+      }
+    }
+  } catch (e) { /* ignore */ }
+}
+
 if (config.isProduction && !config.sessionSecret) {
   throw new Error("SESSION_SECRET is required in production");
 }

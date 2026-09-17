@@ -15,7 +15,8 @@
     if (host === 'localhost' || host === '127.0.0.1' || protocol === 'file:') {
       return 'http://localhost:4242';
     }
-    return '';
+    // Production: site + API share the same host (Express serves both).
+    return window.location.origin;
   }
 
   function readLocalCache() {

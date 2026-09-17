@@ -9,7 +9,8 @@
     if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.protocol === "file:") {
       return "http://localhost:4242";
     }
-    return "";
+    // Production: site + API share the same host (Express serves both).
+    return location.origin;
   }
 
   function val(id) {
