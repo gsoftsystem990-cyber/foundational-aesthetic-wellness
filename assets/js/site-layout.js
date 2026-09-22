@@ -17,20 +17,55 @@
     document.head.appendChild(appleIcon);
   }
 
-  var services = [
-    { name: "Cosmetic Laser Treatment", page: "cosmetic-laser-treatment.html" },
-    { name: "Dermaplaning & Microneedling", page: "dermaplaning-microneedling.html" },
-    { name: "Laser Esthetics", page: "laser-esthetics.html" },
-    { name: "Skin Rejuvenation & Acne Care", page: "skin-rejuvenation-acne-care.html" },
-    { name: "Lip Enhancement — Fotona LipLase", page: "lip-enhancement-liplase.html" },
-    { name: "Eye Rejuvenation — Fotona SmoothEye", page: "eye-rejuvenation-smootheye.html" },
-    { name: "EyeLase™ Non-Surgical Eye Lift", page: "eyelase-eye-lift.html" },
-    { name: "Laser Hair Removal", page: "laser-hair-removal.html" }
+  var serviceCategories = [
+    {
+      name: "Laser",
+      page: "laser.html",
+      items: [
+        { name: "LipLase", page: "lip-enhancement-liplase.html" },
+        { name: "EyeLase", page: "eyelase-eye-lift.html" },
+        { name: "Laser Hair Removal", page: "laser-hair-removal.html" }
+      ]
+    },
+    {
+      name: "Skin Rejuvenation",
+      page: "skin-rejuvenation.html",
+      items: [
+        { name: "Dermaplaning", page: "dermaplaning-microneedling.html#dermaplaning" },
+        { name: "Microneedling", page: "dermaplaning-microneedling.html#microneedling" }
+      ]
+    },
+    {
+      name: "Injectables",
+      page: "injectables.html",
+      items: [
+        { name: "Botox", page: "botox.html" },
+        { name: "Filler", page: "dermal-fillers.html" }
+      ]
+    }
   ];
 
-  function serviceLinks() {
-    return services.map(function (item) {
-      return '<a href="' + page(item.page) + '">' + item.name + "</a>";
+  function servicesMegaMenu() {
+    return serviceCategories.map(function (cat) {
+      return (
+        '<div class="mega-col">' +
+        '<a class="mega-col-title" href="' + page(cat.page) + '">' + cat.name + "</a>" +
+        cat.items.map(function (item) {
+          return '<a href="' + page(item.page) + '">' + item.name + "</a>";
+        }).join("") +
+        "</div>"
+      );
+    }).join("");
+  }
+
+  function servicesMobileLinks() {
+    return serviceCategories.map(function (cat) {
+      var links =
+        '<a href="' + page(cat.page) + '" onclick="closeMNav()"><strong>' + cat.name + "</strong></a>" +
+        cat.items.map(function (item) {
+          return '<a href="' + page(item.page) + '" onclick="closeMNav()">' + item.name + "</a>";
+        }).join("");
+      return links;
     }).join("");
   }
 
@@ -58,9 +93,9 @@
     '<a href="' + page("about-us.html") + '">About Us</a>' +
     '<a href="' + page("our-practice.html") + '">Our Practice</a>' +
     "</div></div>" +
-    '<div class="nav-item"><a href="' + section("#services") + '" class="nav-link">Services <span class="chevron"></span></a>' +
-    '<div class="dropdown">' +
-    serviceLinks() +
+    '<div class="nav-item nav-item--services"><a href="' + section("#services") + '" class="nav-link">Services <span class="chevron"></span></a>' +
+    '<div class="mega-drop">' +
+    servicesMegaMenu() +
     "</div></div>" +
     '<div class="nav-item"><a href="' + page("membership.html") + '" class="nav-link">Membership</a></div>' +
     '<div class="nav-item"><a href="' + page("contact.html") + '" class="nav-link">Contact</a></div>' +
@@ -105,9 +140,7 @@
     '<div class="mnav-group">' +
     '<button type="button" class="mnav-item mnav-item--toggle" aria-expanded="false" data-mnav-toggle data-mnav-label="All Services"><span class="mnav-ico mnav-ico--grid" aria-hidden="true"></span><span>All Services</span><span class="mnav-chevron" aria-hidden="true"></span></button>' +
     '<div class="mnav-sub" hidden>' +
-    services.map(function (item) {
-      return '<a href="' + page(item.page) + '" onclick="closeMNav()">' + item.name + "</a>";
-    }).join("") +
+    servicesMobileLinks() +
     "</div></div>" +
     '<a class="mnav-item" href="' + page("reviews.html") + '" data-mnav-label="Reviews" onclick="closeMNav()"><span class="mnav-ico mnav-ico--star" aria-hidden="true"></span><span>Reviews</span></a>' +
     '<a class="mnav-item" href="tel:00" data-mnav-label="Call 00"><span class="mnav-ico mnav-ico--phone" aria-hidden="true"></span><span>00</span></a>' +
@@ -133,14 +166,9 @@
     '<div class="fg"><label for="book-ph">Phone Number (WhatsApp) *</label><input type="tel" id="book-ph" name="phone" required inputmode="tel" autocomplete="tel" placeholder="(610) 555-0000"></div>' +
     '<div class="fg"><label for="book-svc">Service of Interest</label><select id="book-svc" name="service">' +
     '<option value="">Select a service...</option>' +
-    '<option>Cosmetic Laser Treatment</option>' +
-    '<option>Dermaplaning &amp; Microneedling</option>' +
-    '<option>Laser Esthetics</option>' +
-    '<option>Skin Rejuvenation &amp; Acne Care</option>' +
-    '<option>Lip Enhancement — Fotona LipLase</option>' +
-    '<option>Eye Rejuvenation — Fotona SmoothEye</option>' +
-    '<option>EyeLase™ Non-Surgical Eye Lift</option>' +
-    '<option>Laser Hair Removal</option>' +
+    '<option>Laser</option>' +
+    '<option>Skin Rejuvenation</option>' +
+    '<option>Injectables</option>' +
     '<option>Other / Consultation</option>' +
     '</select></div>' +
     '<div class="fg"><label for="book-date">Appointment Date *</label><input type="date" id="book-date" name="date" required></div>' +
@@ -167,13 +195,9 @@
     '<a href="https://www.instagram.com/laserskinsurgerypa/" target="_blank" rel="noopener" class="soc-btn" title="Instagram">ig</a>' +
     "</div></div>" +
     '<div class="footer-col"><h4>Our Services</h4><ul>' +
-    '<li><a href="' + page("cosmetic-laser-treatment.html") + '">Cosmetic Laser Treatment</a></li>' +
-    '<li><a href="' + page("dermaplaning-microneedling.html") + '">Dermaplaning &amp; Microneedling</a></li>' +
-    '<li><a href="' + page("skin-rejuvenation-acne-care.html") + '">Skin Rejuvenation &amp; Acne Care</a></li>' +
-    '<li><a href="' + page("lip-enhancement-liplase.html") + '">Lip Enhancement — LipLase</a></li>' +
-    '<li><a href="' + page("eye-rejuvenation-smootheye.html") + '">Eye Rejuvenation — SmoothEye</a></li>' +
-    '<li><a href="' + page("eyelase-eye-lift.html") + '">EyeLase™ Eye Lift</a></li>' +
-    '<li><a href="' + page("laser-hair-removal.html") + '">Laser Hair Removal</a></li>' +
+    '<li><a href="' + page("laser.html") + '">Laser</a></li>' +
+    '<li><a href="' + page("skin-rejuvenation.html") + '">Skin Rejuvenation</a></li>' +
+    '<li><a href="' + page("injectables.html") + '">Injectables</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Our Providers</h4><ul>' +
     '<li><a href="' + page("nelly-silva.html") + '">Dr. Nelly Silva</a></li>' +
