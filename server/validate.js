@@ -7,6 +7,10 @@ var CARD_LIKE_RE = /\b(?:\d[ -]*?){13,19}\b/;
 var CVC_KEYS = ["card", "cvc", "cvv", "pan", "ccnum", "cardnumber", "exp_month", "exp_year", "expiry"];
 
 var PLANS = {
+  essential: "essential",
+  elevated: "elevated",
+  signature: "signature",
+  // Legacy aliases (older forms / Stripe prices)
   adult: "adult",
   child: "child"
 };

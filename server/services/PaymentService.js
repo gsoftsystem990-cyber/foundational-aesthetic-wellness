@@ -15,8 +15,12 @@ PaymentService.prototype.isReady = function () {
 };
 
 PaymentService.prototype.priceForPlan = function (plan) {
+  if (plan === "essential") return config.stripe.priceEssential || config.stripe.priceAdult;
+  if (plan === "elevated") return config.stripe.priceElevated;
+  if (plan === "signature") return config.stripe.priceSignature;
   if (plan === "child") return config.stripe.priceChild;
-  return config.stripe.priceAdult;
+  // Legacy adult annual plan
+  return config.stripe.priceAdult || config.stripe.priceEssential;
 };
 
 PaymentService.prototype.createSubscriptionCheckout = async function (enrollment, patientId) {

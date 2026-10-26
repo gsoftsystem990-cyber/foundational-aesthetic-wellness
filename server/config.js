@@ -20,6 +20,12 @@ var stripeSecret = env("STRIPE_SECRET_KEY", "");
 var stripeWebhook = env("STRIPE_WEBHOOK_SECRET", "");
 var priceAdult = env("STRIPE_PRICE_ADULT", "") || env("STRIPE_PRICE_ID", "");
 var priceChild = env("STRIPE_PRICE_CHILD", "") || env("STRIPE_PRICE_ID", "");
+var priceEssential = env("STRIPE_PRICE_ESSENTIAL", "") || priceAdult;
+var priceElevated = env("STRIPE_PRICE_ELEVATED", "");
+var priceSignature = env("STRIPE_PRICE_SIGNATURE", "");
+function looksLikePrice(id) {
+  return Boolean(id && id.indexOf("price_") === 0 && id.indexOf("replace") === -1);
+}
 var stripeConfigured = Boolean(
   stripeSecret &&
   stripeSecret.indexOf("sk_") === 0 &&
@@ -27,9 +33,7 @@ var stripeConfigured = Boolean(
   stripeWebhook &&
   stripeWebhook.indexOf("whsec_") === 0 &&
   stripeWebhook.indexOf("replace") === -1 &&
-  priceAdult &&
-  priceAdult.indexOf("price_") === 0 &&
-  priceAdult.indexOf("replace") === -1
+  (looksLikePrice(priceEssential) || looksLikePrice(priceElevated) || looksLikePrice(priceSignature) || looksLikePrice(priceAdult))
 );
 
 var config = {
@@ -57,6 +61,9 @@ var config = {
     webhookSecret: stripeWebhook,
     priceAdult: priceAdult,
     priceChild: priceChild,
+    priceEssential: priceEssential,
+    priceElevated: priceElevated,
+    priceSignature: priceSignature,
     configured: stripeConfigured,
     mode: stripeSecret.indexOf("sk_live_") === 0 ? "live" : (stripeSecret.indexOf("sk_test_") === 0 ? "test" : "unavailable")
   }

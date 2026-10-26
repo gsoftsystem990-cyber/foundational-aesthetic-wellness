@@ -32,6 +32,8 @@
       page: "skin-rejuvenation.html",
       items: [
         { name: "Dermaplaning", page: "dermaplaning-microneedling.html#dermaplaning" },
+        { name: "Dermaplane Facial", page: "dermaplaning-microneedling.html#dermaplane-facial" },
+        { name: "Microdermabrasion", page: "dermaplaning-microneedling.html#microdermabrasion" },
         { name: "Microneedling", page: "dermaplaning-microneedling.html#microneedling" }
       ]
     },
@@ -97,6 +99,7 @@
     '<div class="mega-drop">' +
     servicesMegaMenu() +
     "</div></div>" +
+    '<div class="nav-item"><a href="' + page("pricing.html") + '" class="nav-link">Pricing</a></div>' +
     '<div class="nav-item"><a href="' + page("membership.html") + '" class="nav-link">Membership</a></div>' +
     '<div class="nav-item"><a href="' + page("contact.html") + '" class="nav-link">Contact</a></div>' +
     "</nav>" +
@@ -120,6 +123,7 @@
     '<div class="mnav-list">' +
     '<a class="mnav-item" href="' + home + '" data-mnav-label="Home" onclick="closeMNav()"><span class="mnav-ico mnav-ico--home" aria-hidden="true"></span><span>Home</span></a>' +
     '<a class="mnav-item" href="' + section("#services") + '" data-mnav-label="Services" onclick="closeMNav()"><span class="mnav-ico mnav-ico--spark" aria-hidden="true"></span><span>Services</span></a>' +
+    '<a class="mnav-item" href="' + page("pricing.html") + '" data-mnav-label="Pricing" onclick="closeMNav()"><span class="mnav-ico mnav-ico--spark" aria-hidden="true"></span><span>Pricing</span></a>' +
     '<a class="mnav-item" href="' + page("membership.html") + '" data-mnav-label="Membership" onclick="closeMNav()"><span class="mnav-ico mnav-ico--card" aria-hidden="true"></span><span>Membership</span></a>' +
     '<a class="mnav-item" href="' + page("contact.html") + '" data-mnav-label="Contact" onclick="closeMNav()"><span class="mnav-ico mnav-ico--mail" aria-hidden="true"></span><span>Contact</span></a>' +
     "</div>" +
@@ -204,7 +208,8 @@
     '<li><a href="' + page("lexi-lojewski.html") + '">Lexi Lojewski</a></li>' +
     "</ul></div>" +
     '<div class="footer-col"><h4>Patients</h4><ul>' +
-    '<li><a href="' + page("membership.html") + '">Membership Plan</a></li>' +
+    '<li><a href="' + page("pricing.html") + '">Pricing</a></li>' +
+    '<li><a href="' + page("membership.html") + '">Membership Plans</a></li>' +
     '<li><a href="' + page("contact.html") + '">Collegeville, PA</a></li>' +
     '<li><a href="tel:00">00</a></li>' +
     "</ul></div></div>" +
