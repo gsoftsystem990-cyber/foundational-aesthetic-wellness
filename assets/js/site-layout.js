@@ -73,9 +73,9 @@
 
   var headerHtml =
     '<div id="topbar"><div class="topbar-inner">' +
-    '<a class="tb-item" href="tel:00">' +
+    '<a class="tb-item" href="tel:+12672818236">' +
     '<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>' +
-    "00</a>" +
+    "267-281-8236</a>" +
     '<button type="button" class="tb-item tb-book" data-open-book-modal>Book Now</button>' +
     "</div></div>" +
     '<div id="header"><div class="header-inner">' +
@@ -147,7 +147,7 @@
     servicesMobileLinks() +
     "</div></div>" +
     '<a class="mnav-item" href="' + page("reviews.html") + '" data-mnav-label="Reviews" onclick="closeMNav()"><span class="mnav-ico mnav-ico--star" aria-hidden="true"></span><span>Reviews</span></a>' +
-    '<a class="mnav-item" href="tel:00" data-mnav-label="Call 00"><span class="mnav-ico mnav-ico--phone" aria-hidden="true"></span><span>00</span></a>' +
+    '<a class="mnav-item" href="tel:+12672818236" data-mnav-label="Call 267-281-8236"><span class="mnav-ico mnav-ico--phone" aria-hidden="true"></span><span>267-281-8236</span></a>' +
     "</div>" +
     '<button type="button" class="mnav-book" data-open-book-modal onclick="closeMNav()">Book an Appointment</button>' +
     "</div></aside></div>";
@@ -210,8 +210,8 @@
     '<div class="footer-col"><h4>Patients</h4><ul>' +
     '<li><a href="' + page("pricing.html") + '">Pricing</a></li>' +
     '<li><a href="' + page("membership.html") + '">Membership Plans</a></li>' +
-    '<li><a href="' + page("contact.html") + '">Collegeville, PA</a></li>' +
-    '<li><a href="tel:00">00</a></li>' +
+    '<li><a href="' + page("contact.html") + '">399 Arcola Road, Suite 100<br>Collegeville, PA 19426</a></li>' +
+    '<li><a href="tel:+12672818236">267-281-8236</a></li>' +
     "</ul></div></div>" +
     "</footer>";
 
