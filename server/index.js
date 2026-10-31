@@ -44,6 +44,7 @@ app.use(helmet({
       "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       "font-src": ["'self'", "https://fonts.gstatic.com", "data:"],
       "img-src": ["'self'", "data:", "https:", "blob:"],
+      "frame-src": ["'self'", "https://www.google.com", "https://maps.google.com"],
       "connect-src": ["'self'", "https:"],
       "form-action": ["'self'", "https:"]
     }

@@ -23,5 +23,10 @@ window.FAW_SITE_CONFIG = {
 
   googlePlaceId: 'ChIJgxBm5BSVxokRzDPdSMCUzT4',
   googlePlacesApiKey: '',
-  googleReviewsUrl: ''
+  googleReviewsUrl: '',
+
+  // Practice location — embed needs no API key; directions opens Google Maps.
+  practiceAddress: '399 Arcola Road, Suite 100, Collegeville, PA 19426',
+  mapsEmbedUrl: 'https://www.google.com/maps?q=399+Arcola+Road,+Suite+100,+Collegeville,+PA+19426&z=16&output=embed',
+  mapsDirectionsUrl: 'https://maps.app.goo.gl/FrP8BQQtknxPzfUM8'
 };
