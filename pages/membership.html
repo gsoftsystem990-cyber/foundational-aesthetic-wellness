@@ -61,7 +61,7 @@
       <p class="tier-card__tag">Best for comprehensive care</p>
       <ul>
         <li>15% off skincare services</li>
-        <li>15% off select laser treatments</li>
+        <li>20% off select laser treatments</li>
         <li>Botox® $10 per unit</li>
         <li>Priority booking &amp; treatment planning</li>
         <li>15% off skincare retail</li>
@@ -157,12 +157,14 @@
       <div class="fg">
         <label for="mem-family">Family members to add (optional)</label>
         <textarea id="mem-family" name="family" maxlength="400" placeholder="Names and ages, if applicable"></textarea>
+        <p class="field-hint">Only include minors if you are their parent or legal guardian. Saved to your patient notes for staff.</p>
       </div>
       <div class="fg">
         <label for="mem-notes">Anything else we should know</label>
-        <textarea id="mem-notes" name="notes" maxlength="500" placeholder="Optional — do not enter card numbers"></textarea>
+        <textarea id="mem-notes" name="notes" maxlength="500" placeholder="Optional — do not enter card numbers or detailed medical records"></textarea>
+        <p class="field-hint">Saved for staff in your patient profile. Do not enter payment card details.</p>
       </div>
-      <p class="membership-legal">By continuing you agree this is a practice membership / discount plan, not dental or medical insurance. You will complete payment on Stripe. Membership renews monthly until canceled with 30 days’ notice. Discounts cannot be combined with other offers.</p>
+      <p class="membership-legal">By continuing you agree this is a practice membership / discount plan, not dental or medical insurance, and you agree to our <a href="terms.html">Terms of Use</a> and <a href="privacy.html">Privacy Policy</a>. You will complete payment on Stripe. Membership renews monthly until canceled with 30 days’ notice. Discounts cannot be combined with other offers.</p>
       <button type="submit" class="form-submit-btn" id="membershipSubmit">Continue to secure payment</button>
       <p class="membership-msg" id="membershipMsg" hidden></p>
       <p class="membership-msg" id="membershipDevNote" hidden></p>

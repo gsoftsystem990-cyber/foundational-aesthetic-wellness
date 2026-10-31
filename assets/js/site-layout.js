@@ -194,9 +194,7 @@
     '<div class="fb-sub">foundationalaestheticwellness.com</div>' +
     "<p>Expert aesthetic wellness, laser treatments, and cosmetic care in Collegeville, PA.</p>" +
     '<div class="social-row">' +
-    '<a href="https://maps.app.goo.gl/FrP8BQQtknxPzfUM8" target="_blank" rel="noopener" class="soc-btn" title="Google">G</a>' +
-    '<a href="https://www.facebook.com/LaserSkinSurgeryPA/" target="_blank" rel="noopener" class="soc-btn" title="Facebook">f</a>' +
-    '<a href="https://www.instagram.com/laserskinsurgerypa/" target="_blank" rel="noopener" class="soc-btn" title="Instagram">ig</a>' +
+    '<a href="https://maps.app.goo.gl/FrP8BQQtknxPzfUM8" target="_blank" rel="noopener" class="soc-btn" title="Google Maps">G</a>' +
     "</div></div>" +
     '<div class="footer-col"><h4>Our Services</h4><ul>' +
     '<li><a href="' + page("laser.html") + '">Laser</a></li>' +
@@ -212,6 +210,8 @@
     '<li><a href="' + page("membership.html") + '">Membership Plans</a></li>' +
     '<li><a href="' + page("contact.html") + '">399 Arcola Road, Suite 100<br>Collegeville, PA 19426</a></li>' +
     '<li><a href="tel:+12672818236">267-281-8236</a></li>' +
+    '<li><a href="' + page("privacy.html") + '">Privacy Policy</a></li>' +
+    '<li><a href="' + page("terms.html") + '">Terms of Use</a></li>' +
     "</ul></div></div>" +
     "</footer>";
 

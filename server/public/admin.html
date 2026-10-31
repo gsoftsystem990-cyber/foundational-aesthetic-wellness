@@ -1098,11 +1098,11 @@
               </div>
               <div class="fg">
                 <label for="newPassword">New password</label>
-                <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" required minlength="8">
+                <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" required minlength="12">
               </div>
               <div class="fg">
                 <label for="confirmPassword">Confirm new password</label>
-                <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8">
+                <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required minlength="12">
               </div>
               <button type="submit" class="btn-primary" id="passwordSaveBtn">Update password</button>
               <p class="err" id="passwordErr" hidden></p>
@@ -1623,6 +1623,7 @@
         '<div class="toolbar" style="margin-top:14px">' +
           '<button type="submit" class="btn-primary" id="patientSaveBtn" style="width:auto;min-width:160px">' + (isNew ? "Create patient" : "Save profile") + "</button>" +
           (!isNew ? '<button type="button" class="btn-ghost" id="patientRefreshBtn">Reload records</button>' : "") +
+          (!isNew ? '<button type="button" class="btn-ghost" id="patientDeleteBtn" style="color:var(--danger,#a33)">Delete profile</button>' : "") +
         "</div>" +
         '<p class="err" id="patientErr" hidden></p>' +
         '<p class="ok-msg" id="patientOk" hidden></p>' +
@@ -1708,6 +1709,40 @@
     if (reloadBtn) {
       reloadBtn.addEventListener("click", function () {
         openPatientProfile(selectedPatientId);
+      });
+    }
+    var deleteBtn = document.getElementById("patientDeleteBtn");
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", async function () {
+        if (!selectedPatientId) return;
+        var ok = window.confirm(
+          "Delete this patient profile and photo? Linked bookings, messages, and reviews are kept for records. This cannot be undone."
+        );
+        if (!ok) return;
+        var res = await fetch("/admin/api/patients/" + encodeURIComponent(selectedPatientId) + "/delete", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrf,
+            Accept: "application/json"
+          },
+          body: "{}"
+        });
+        var data = await res.json().catch(function () { return {}; });
+        if (res.status === 401) {
+          showLogin();
+          return;
+        }
+        if (!res.ok) {
+          showPatientMsg(data.error || "Could not delete patient.", "");
+          return;
+        }
+        csrf = data.csrf || csrf;
+        selectedPatientId = "";
+        document.getElementById("patientDetail").innerHTML =
+          '<p class="patient-empty">Patient profile deleted. Select another patient or create a new one.</p>';
+        loadPatients();
       });
     }
   }

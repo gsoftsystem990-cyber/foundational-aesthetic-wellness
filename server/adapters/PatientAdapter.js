@@ -6,12 +6,22 @@ function LocalPatientAdapter(db) {
   this.db = db;
 }
 
+LocalPatientAdapter.prototype.buildEnrollmentNotes = function (input) {
+  var parts = [];
+  var family = String(input.family || "").trim().slice(0, 400);
+  var notes = String(input.notes || "").trim().slice(0, 500);
+  if (family) parts.push("Family members: " + family);
+  if (notes) parts.push(notes);
+  return parts.join("\n").slice(0, 4000);
+};
+
 LocalPatientAdapter.prototype.matchOrCreate = function (input) {
   var externalId = input.externalPatientId ? String(input.externalPatientId).slice(0, 80) : "";
   var lastName = ids.normalizeName(input.lastName);
   var dob = input.dob;
   var phone = ids.normalizePhone(input.phone);
   var now = ids.nowIso();
+  var enrollmentNotes = this.buildEnrollmentNotes(input);
 
   var existing = null;
   if (externalId) {
@@ -24,15 +34,30 @@ LocalPatientAdapter.prototype.matchOrCreate = function (input) {
   }
 
   if (existing) {
+    var mergedNotes = String(existing.notes || "").trim();
+    if (enrollmentNotes) {
+      mergedNotes = mergedNotes
+        ? (mergedNotes + "\n\n[" + now.slice(0, 10) + " enrollment]\n" + enrollmentNotes)
+        : enrollmentNotes;
+      mergedNotes = mergedNotes.slice(0, 4000);
+    }
     this.db.prepare(
-      "UPDATE patients SET first_name = ?, email = ?, phone_display = COALESCE(?, phone_display), external_patient_id = COALESCE(external_patient_id, ?), updated_at = ? WHERE patient_id = ?"
-    ).run(input.firstName, input.email, input.phone || null, externalId || null, now, existing.patient_id);
+      "UPDATE patients SET first_name = ?, email = ?, phone_display = COALESCE(?, phone_display), external_patient_id = COALESCE(external_patient_id, ?), notes = ?, updated_at = ? WHERE patient_id = ?"
+    ).run(
+      input.firstName,
+      input.email,
+      input.phone || null,
+      externalId || null,
+      mergedNotes,
+      now,
+      existing.patient_id
+    );
     return this.db.prepare("SELECT * FROM patients WHERE patient_id = ?").get(existing.patient_id);
   }
 
   var patientId = ids.newId("pat");
   this.db.prepare(
-    "INSERT INTO patients (patient_id, external_patient_id, first_name, last_name, email, phone_normalized, phone_display, dob, address, notes, photo_path, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '', NULL, ?, ?)"
+    "INSERT INTO patients (patient_id, external_patient_id, first_name, last_name, email, phone_normalized, phone_display, dob, address, notes, photo_path, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', ?, NULL, ?, ?)"
   ).run(
     patientId,
     externalId || null,
@@ -42,6 +67,7 @@ LocalPatientAdapter.prototype.matchOrCreate = function (input) {
     phone,
     input.phone || phone,
     dob,
+    enrollmentNotes || "",
     now,
     now
   );

@@ -1,6 +1,7 @@
 "use strict";
 
 var config = require("../config");
+var AuditService = require("./AuditService");
 
 function normalizeWhatsAppTo(phone, defaultCountry) {
   var digits = String(phone || "").replace(/\D/g, "");
@@ -70,18 +71,51 @@ async function bookingConfirmed(booking, message) {
   return sendWhatsApp(booking.phone, message);
 }
 
-// Email/FormSubmit notifications removed. Kept as no-ops so existing callers stay safe.
-function noop() {
-  return Promise.resolve();
+function membershipId(row) {
+  return row && (row.membership_id || row.membershipId) || null;
+}
+
+function logStaffEvent(action, membership, detail) {
+  try {
+    AuditService.write("system", action, membershipId(membership), detail || "");
+    console.info("membership_notify", action, membershipId(membership) || "");
+  } catch (err) {
+    console.error("membership_notify_failed");
+  }
+  return Promise.resolve({ ok: true, mode: "audit" });
+}
+
+function activated(membership) {
+  return logStaffEvent("membership_activated_notify", membership, "Membership activated — follow up in admin if needed.");
+}
+
+function paymentFailed(membership) {
+  return logStaffEvent("membership_payment_failed_notify", membership, "Payment failed — contact patient.");
+}
+
+function cancelled(membership) {
+  return logStaffEvent("membership_cancelled_notify", membership, "Membership cancelled.");
+}
+
+function upcomingRenewal(membership) {
+  return logStaffEvent(
+    "membership_renewal_reminder",
+    membership,
+    "Renewal due within reminder window — contact patient if needed."
+  );
+}
+
+function expired(membership) {
+  return logStaffEvent("membership_expired_notify", membership, "Membership expired.");
 }
 
 module.exports = {
-  send: noop,
-  activated: noop,
-  paymentFailed: noop,
-  cancelled: noop,
-  upcomingRenewal: noop,
-  expired: noop,
+  send: function () { return Promise.resolve({ ok: true, mode: "none" }); },
+  activated: activated,
+  paymentFailed: paymentFailed,
+  cancelled: cancelled,
+  upcomingRenewal: upcomingRenewal,
+  expired: expired,
   sendWhatsApp: sendWhatsApp,
   whatsappDeepLink: whatsappDeepLink,
   bookingConfirmed: bookingConfirmed

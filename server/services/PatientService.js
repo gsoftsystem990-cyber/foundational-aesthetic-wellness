@@ -241,6 +241,14 @@ PatientService.prototype.removePhoto = function (patientId) {
   return this.getById(patientId);
 };
 
+PatientService.prototype.deletePatient = function (patientId) {
+  var row = this.getById(patientId);
+  if (!row) return null;
+  this.removePhoto(patientId);
+  db.prepare("DELETE FROM patients WHERE patient_id = ?").run(patientId);
+  return { ok: true, patient_id: patientId };
+};
+
 PatientService.prototype.linkedRecords = function (patient) {
   var email = String(patient.email || "").trim().toLowerCase();
   var phone = ids.normalizePhone(patient.phone_display || patient.phone_normalized || "");

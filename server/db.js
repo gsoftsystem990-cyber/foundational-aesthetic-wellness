@@ -169,6 +169,8 @@ CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
 CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_bookings_created ON bookings(created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_active_slot ON bookings(preferred_time)
+  WHERE preferred_time IS NOT NULL AND preferred_time != '' AND status IN ('new', 'contacted', 'confirmed');
 CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_created ON contact_messages(created_at);
 `);

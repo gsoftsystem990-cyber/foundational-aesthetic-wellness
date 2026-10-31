@@ -23,8 +23,8 @@ WebhookService.prototype.markSeen = function (eventId, eventType) {
 
 WebhookService.prototype.handle = async function (event) {
   if (this.seen(event.id)) return { duplicate: true };
-  this.markSeen(event.id, event.type);
 
+  // Process first; mark seen only after success so Stripe retries can recover.
   switch (event.type) {
     case "checkout.session.completed":
       await this.onCheckoutCompleted(event.data.object);
@@ -48,6 +48,8 @@ WebhookService.prototype.handle = async function (event) {
     default:
       break;
   }
+
+  this.markSeen(event.id, event.type);
   return { ok: true };
 };
 

@@ -243,20 +243,31 @@ BookingService.prototype.create = function (data) {
 
   var now = ids.nowIso();
   var bookingId = ids.newId("bk");
-  db.prepare(
-    "INSERT INTO bookings (booking_id, first_name, last_name, email, phone, service, preferred_time, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)"
-  ).run(
-    bookingId,
-    data.firstName,
-    data.lastName,
-    data.email,
-    data.phone,
-    data.service,
-    data.preferred || "",
-    data.message || "",
-    now,
-    now
-  );
+  try {
+    db.prepare(
+      "INSERT INTO bookings (booking_id, first_name, last_name, email, phone, service, preferred_time, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)"
+    ).run(
+      bookingId,
+      data.firstName,
+      data.lastName,
+      data.email,
+      data.phone,
+      data.service,
+      data.preferred || "",
+      data.message || "",
+      now,
+      now
+    );
+  } catch (insertErr) {
+    // Unique partial index on active preferred_time prevents double-booking races.
+    if (this.isSlotTaken(data.preferred) || /UNIQUE|constraint/i.test(String(insertErr && insertErr.message))) {
+      var raceErr = new Error("SLOT_TAKEN");
+      raceErr.code = "SLOT_TAKEN";
+      raceErr.alternatives = this.findAlternatives(data.preferred, 6);
+      throw raceErr;
+    }
+    throw insertErr;
+  }
   return this.getById(bookingId);
 };
 
@@ -307,7 +318,7 @@ BookingService.prototype.buildConfirmationMessage = function (row) {
     "Hi " + name + ", your booking at Foundational Aesthetic Wellness is confirmed.\n\n" +
     "Service: " + service + "\n" +
     "When: " + when + "\n\n" +
-    "If you need to reschedule, call 00. We look forward to seeing you!"
+    "If you need to reschedule, call 267-281-8236. We look forward to seeing you!"
   );
 };
 

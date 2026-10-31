@@ -127,7 +127,7 @@ async function submitForm(e) {
   try {
     var api = membershipApiBase();
     if (!api) {
-      throw new Error('Message service is currently unavailable. Please try again later or call 00.');
+      throw new Error('Message service is currently unavailable. Please try again later or call 267-281-8236.');
     }
     var res = await fetch(api + '/api/contact-messages', {
       method: 'POST',
@@ -424,7 +424,7 @@ function initBookModal() {
     try {
       var api = membershipApiBase();
       if (!api) {
-        throw new Error('Booking service is currently unavailable. Please call 00.');
+        throw new Error('Booking service is currently unavailable. Please call 267-281-8236.');
       }
       var res = await fetch(api + '/api/bookings', {
         method: 'POST',

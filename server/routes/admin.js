@@ -238,6 +238,17 @@ router.get("/api/patients/:id/photo", auth.requireAdmin, function (req, res) {
   res.sendFile(abs);
 });
 
+router.post("/api/patients/:id/delete", auth.requireAdmin, auth.requireCsrf, function (req, res) {
+  var deleted = patients.deletePatient(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "Patient not found." });
+  AuditService.write("admin", "patient_deleted", null, req.params.id);
+  res.json({
+    ok: true,
+    message: "Patient profile and photo deleted. Linked bookings/messages/reviews remain for records unless removed separately.",
+    csrf: req.adminSession.csrf_token
+  });
+});
+
 router.post("/api/change-password", auth.requireAdmin, auth.requireCsrf, function (req, res) {
   var body = req.body || {};
   var result = auth.changePassword(body.currentPassword, body.newPassword, body.confirmPassword);

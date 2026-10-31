@@ -1,16 +1,13 @@
 "use strict";
 
 var crypto = require("crypto");
-var fs = require("fs");
-var path = require("path");
 var db = require("./db");
 var ids = require("./lib/ids");
 var config = require("./config");
 
 var COOKIE = "faw_admin";
 var MAX_AGE_MS = 8 * 60 * 60 * 1000;
-var ENV_PATH = path.join(__dirname, ".env");
-var MIN_PASSWORD_LEN = 8;
+var MIN_PASSWORD_LEN = 12;
 
 function createSession() {
   var sessionId = crypto.randomBytes(32).toString("hex");
@@ -100,34 +97,9 @@ function saveAdminCredentials(username, password) {
     ).run(username, passwordHash, salt, now);
   }
   config.adminUsername = username;
-  config.adminPassword = String(password);
+  // Do not keep plaintext password in memory after hashing to DB.
+  config.adminPassword = "";
   return true;
-}
-
-function quoteEnvValue(value) {
-  var str = String(value == null ? "" : value);
-  if (/[\s#"']/.test(str) || str.indexOf("\\") !== -1) {
-    return '"' + str.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
-  }
-  return str;
-}
-
-function updateEnvPassword(newPassword) {
-  try {
-    if (!fs.existsSync(ENV_PATH)) return false;
-    var text = fs.readFileSync(ENV_PATH, "utf8");
-    var line = "ADMIN_PASSWORD=" + quoteEnvValue(newPassword);
-    if (/^ADMIN_PASSWORD=/m.test(text)) {
-      text = text.replace(/^ADMIN_PASSWORD=.*$/m, line);
-    } else {
-      text = text.replace(/\s*$/, "\n") + line + "\n";
-    }
-    fs.writeFileSync(ENV_PATH, text, "utf8");
-    return true;
-  } catch (err) {
-    console.error("admin_env_password_update_failed");
-    return false;
-  }
 }
 
 function ensureAdminSeeded() {
@@ -188,13 +160,11 @@ function changePassword(currentPassword, newPassword, confirmPassword) {
   if (!username) return { error: "Admin username is not configured." };
 
   saveAdminCredentials(username, next);
-  var envUpdated = updateEnvPassword(next);
+  // Password is stored as a hash in the database only — never rewrite .env from the app.
   return {
     ok: true,
-    envUpdated: envUpdated,
-    message: envUpdated
-      ? "Password updated successfully."
-      : "Password updated in the app. Could not update server/.env automatically — edit ADMIN_PASSWORD there if needed."
+    envUpdated: false,
+    message: "Password updated successfully. It is stored hashed in the database (not in .env)."
   };
 }
 

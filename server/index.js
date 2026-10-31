@@ -73,21 +73,11 @@ app.use(cors({
       if (!config.isProduction && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")) {
         return cb(null, true);
       }
-      // Production: allow same-site custom domain / Render / Railway hostnames
-      // when PUBLIC_SITE_URL hostname matches, or *.onrender.com / *.up.railway.app
-      if (config.isProduction) {
-        if (config.publicSiteUrl) {
-          var siteHost = new URL(config.publicSiteUrl).hostname.replace(/^www\./, "");
-          var originHost = parsed.hostname.replace(/^www\./, "");
-          if (originHost === siteHost) return cb(null, true);
-        }
-        if (
-          /\.onrender\.com$/i.test(parsed.hostname) ||
-          /\.up\.railway\.app$/i.test(parsed.hostname) ||
-          /\.railway\.app$/i.test(parsed.hostname)
-        ) {
-          return cb(null, true);
-        }
+      // Production: only PUBLIC_SITE_URL / ALLOWED_ORIGINS (no wildcard PaaS hosts)
+      if (config.isProduction && config.publicSiteUrl) {
+        var siteHost = new URL(config.publicSiteUrl).hostname.replace(/^www\./, "");
+        var originHost = parsed.hostname.replace(/^www\./, "");
+        if (originHost === siteHost) return cb(null, true);
       }
     } catch (e) { /* ignore */ }
 
@@ -134,7 +124,16 @@ var contactLimiter = rateLimit({
 });
 
 app.get("/health", function (req, res) {
-  res.json({ ok: true });
+  try {
+    db.prepare("SELECT 1 AS ok").get();
+    return res.json({
+      ok: true,
+      db: true,
+      payment: paymentService.isReady()
+    });
+  } catch (err) {
+    return res.status(503).json({ ok: false, db: false });
+  }
 });
 
 app.get("/public-status", function (req, res) {
@@ -251,7 +250,9 @@ app.post("/create-checkout-session", checkoutLimiter, async function (req, res) 
       email: data.email,
       phone: data.phone,
       dob: data.dob,
-      externalPatientId: data.patientChartId
+      externalPatientId: data.patientChartId,
+      family: data.family,
+      notes: data.notes
     });
 
     var session = await paymentService.createSubscriptionCheckout(data, patient.patient_id);
@@ -297,18 +298,52 @@ app.post("/internal/jobs/renewal-reminders", auth.requireCron, async function (r
 
 app.use("/admin", adminRoutes);
 
-// Serve the marketing website from the project root (same port as the API).
+// Never expose server code, databases, secrets, or tooling via static files.
 var siteRoot = path.join(__dirname, "..");
+var BLOCKED_STATIC_PREFIXES = [
+  "/server",
+  "/node_modules",
+  "/.git",
+  "/.cursor",
+  "/.github",
+  "/canvases",
+  "/agent-transcripts"
+];
+app.use(function (req, res, next) {
+  var rawPath = String(req.path || "").split("?")[0].toLowerCase();
+  for (var i = 0; i < BLOCKED_STATIC_PREFIXES.length; i++) {
+    var prefix = BLOCKED_STATIC_PREFIXES[i];
+    if (rawPath === prefix || rawPath.indexOf(prefix + "/") === 0) {
+      return res.status(404).send("Not found");
+    }
+  }
+  if (
+    /^\/(\.env|package(-lock)?\.json|render\.ya?ml|.*\.(db|sqlite3?|sql|pem|key))$/i.test(rawPath)
+  ) {
+    return res.status(404).send("Not found");
+  }
+  next();
+});
+
+// Serve the marketing website from the project root (same port as the API).
 app.use(express.static(siteRoot, {
   index: "index.html",
   extensions: ["html"],
-  dotfiles: "ignore",
+  dotfiles: "deny",
   setHeaders: function (res, filePath) {
     if (/\.(html)$/i.test(filePath)) {
       res.setHeader("Cache-Control", "no-cache");
     }
   }
 }));
+
+app.use(function (req, res) {
+  res.set("Cache-Control", "no-store");
+  if (req.accepts("html")) {
+    return res.status(404).sendFile(path.join(siteRoot, "pages", "404.html"));
+  }
+  return res.status(404).json({ error: "Not found" });
+});
 
 app.use(function (err, req, res, next) {
   if (err && err.message === "Origin not allowed") {
